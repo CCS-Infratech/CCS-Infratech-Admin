@@ -10,9 +10,7 @@ const baseConfig: NextConfig = {
       }
     ]
   },
-  transpilePackages: ['geist'],
-  typescript: { ignoreBuildErrors: true },
-  eslint: { ignoreDuringBuilds: true }
+  transpilePackages: ['geist']
 };
 
 let configWithPlugins = baseConfig;

@@ -2,8 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { html } from '@codemirror/lang-html';
 import { EditorState } from '@codemirror/state';
-import { lineNumbers } from '@codemirror/view';
-import { EditorView } from 'codemirror';
+import { EditorView, lineNumbers } from '@codemirror/view';
 
 import { theme } from './theme';
 
