@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --port 3003",
     "build": "next build",
-    "start": "next start",
+    "start": "next start --port 3003",
     "lint": "next lint",
     "dev:debug": "set NEXT_TURBO_DEBUG_LOGGING=1 && next dev",
     "lint:fix": "eslint src --fix && bun format",
