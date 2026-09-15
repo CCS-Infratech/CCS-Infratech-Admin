@@ -12,6 +12,8 @@ export interface Project {
   slug: string;
   content: string;
   description: string;
+  category?: string;
+  groupId?: string | null;
   clientName: string | null;
   projectUrl: string | null;
   completionDate: string | null;
@@ -28,6 +30,11 @@ export interface Project {
     username: string;
     email: string;
   };
+  group?: {
+    id: string;
+    name: string;
+    slug: string;
+  } | null;
   images: any[];
   specifications: any[];
   amenities: any[];

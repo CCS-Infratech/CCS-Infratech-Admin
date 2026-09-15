@@ -33,6 +33,8 @@ import {
 import { DatePicker } from '@/components/ui/date-picker';
 import { MediaSelectionDialog } from '@/components/modal/media-gallary';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { projectGroupService } from '@/http/project-group';
+import { PROJECT_CATEGORIES } from '@/constants/projects';
 
 interface MediaObject {
   key: string;
@@ -287,6 +289,11 @@ export default function ProjectEditForm({ projectId }: { projectId: string }) {
   const [status, setStatus] = useState<'UNDER_CONSTRUCTION' | 'COMPLETED'>(
     'UNDER_CONSTRUCTION'
   );
+  const [category, setCategory] = useState<string>('RESIDENTIAL');
+  const [groupId, setGroupId] = useState<string>('');
+  const [projectGroups, setProjectGroups] = useState<
+    Array<{ id: string; name: string }>
+  >([]);
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
 
   const [galleryImages, setGalleryImages] = useState<
@@ -346,6 +353,8 @@ export default function ProjectEditForm({ projectId }: { projectId: string }) {
         setFeatured(project.featured || false);
         setPublished(project.published || false);
         setStatus(project.status === 'COMPLETED' ? 'COMPLETED' : 'UNDER_CONSTRUCTION');
+        setCategory(project.category || 'RESIDENTIAL');
+        setGroupId(project.groupId || project.group?.id || '');
 
         // Populate logo
         if (project.logoUrl) {
@@ -494,6 +503,19 @@ export default function ProjectEditForm({ projectId }: { projectId: string }) {
     fetchProject();
   }, [projectId]);
 
+  useEffect(() => {
+    const fetchGroups = async () => {
+      try {
+        const response = await projectGroupService.getProjectGroups();
+        setProjectGroups(response.data || []);
+      } catch (error) {
+        console.error('Failed to load project groups', error);
+      }
+    };
+
+    fetchGroups();
+  }, []);
+
   const handleGalleryImageSelection = (selectedMedia: MediaObject[]) => {
     const remainingSlots = 6 - galleryImages.length;
     const imagesToAdd = selectedMedia.slice(0, remainingSlots);
@@ -559,6 +581,16 @@ export default function ProjectEditForm({ projectId }: { projectId: string }) {
       return;
     }
 
+    if (!groupId) {
+      toast.error('Please select a project group');
+      return;
+    }
+
+    if (!category) {
+      toast.error('Please select a project category');
+      return;
+    }
+
     try {
       setIsSubmitting(true);
 
@@ -591,6 +623,8 @@ export default function ProjectEditForm({ projectId }: { projectId: string }) {
         logoUrl: logoUrl ? logoUrl.url : null,
         content,
         status,
+        category,
+        groupId,
         completionDate: completionDate || null,
         featured,
         published,
@@ -783,6 +817,42 @@ export default function ProjectEditForm({ projectId }: { projectId: string }) {
                     rows={3}
                     className='rounded-lg border-gray-200 text-sm focus:border-[#b07d17] focus:ring-[#b07d17] sm:rounded-xl sm:text-base'
                   />
+                </div>
+
+                <div className='rounded-xl border border-gray-100 bg-white p-4 shadow-sm sm:rounded-2xl sm:p-6'>
+                  <Label className='mb-2 block text-sm font-semibold text-gray-900 sm:mb-3'>
+                    Project Group
+                  </Label>
+                  <Select value={groupId || undefined} onValueChange={setGroupId}>
+                    <SelectTrigger className='rounded-lg border-gray-200 focus:border-[#b07d17] focus:ring-[#b07d17]'>
+                      <SelectValue placeholder='Select a project group' />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {projectGroups.map((group) => (
+                        <SelectItem key={group.id} value={group.id}>
+                          {group.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className='rounded-xl border border-gray-100 bg-white p-4 shadow-sm sm:rounded-2xl sm:p-6'>
+                  <Label className='mb-2 block text-sm font-semibold text-gray-900 sm:mb-3'>
+                    Project Category
+                  </Label>
+                  <Select value={category} onValueChange={setCategory}>
+                    <SelectTrigger className='rounded-lg border-gray-200 focus:border-[#b07d17] focus:ring-[#b07d17]'>
+                      <SelectValue placeholder='Select a category' />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {PROJECT_CATEGORIES.map((item) => (
+                        <SelectItem key={item.id} value={item.id}>
+                          {item.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className='rounded-xl border border-gray-100 bg-white p-4 shadow-sm sm:rounded-2xl sm:p-6'>

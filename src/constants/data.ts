@@ -29,6 +29,14 @@ export const navItems: NavItem[] = [
     items: []
   },
   {
+    title: 'Project Groups',
+    url: '/dashboard/project-groups',
+    icon: 'folders',
+    isActive: false,
+    shortcut: ['g', 'g'],
+    items: []
+  },
+  {
     title: 'Media',
     url: '#',
     icon: 'billing',

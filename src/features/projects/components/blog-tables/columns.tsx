@@ -14,6 +14,7 @@ import {
 import { Project } from '../project-listing';
 import { CellAction } from './cell-action';
 import Link from 'next/link';
+import { formatProjectCategory } from '@/constants/projects';
 
 const PUBLISHED_OPTIONS = [
   { label: 'Published', value: 'true' },
@@ -81,6 +82,30 @@ export const columns: ColumnDef<Project>[] = [
       icon: FileText
     },
     enableColumnFilter: true
+  },
+  {
+    id: 'group',
+    accessorFn: (row) => row.group?.name || 'Ungrouped',
+    header: ({ column }: { column: Column<Project, unknown> }) => (
+      <DataTableColumnHeader column={column} title='Group' />
+    ),
+    cell: ({ row }) => (
+      <span className='text-sm text-gray-700'>
+        {row.original.group?.name || 'Ungrouped'}
+      </span>
+    )
+  },
+  {
+    id: 'category',
+    accessorKey: 'category',
+    header: ({ column }: { column: Column<Project, unknown> }) => (
+      <DataTableColumnHeader column={column} title='Category' />
+    ),
+    cell: ({ row }) => (
+      <Badge variant='outline' className='font-normal'>
+        {formatProjectCategory(row.original.category)}
+      </Badge>
+    )
   },
   {
     id: 'published',
