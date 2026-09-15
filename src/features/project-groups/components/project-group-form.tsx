@@ -9,7 +9,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { projectGroupService } from '@/http/project-group';
 import { toast } from 'sonner';
-import { Loader2 } from 'lucide-react';
+import { Loader2, ImagePlus } from 'lucide-react';
+import { MediaSelectionDialog } from '@/components/modal/media-gallary';
 
 interface ProjectGroupFormProps {
   groupId?: string;
@@ -22,8 +23,17 @@ export default function ProjectGroupForm({ groupId }: ProjectGroupFormProps) {
   const [description, setDescription] = useState('');
   const [isActive, setIsActive] = useState(true);
   const [sortOrder, setSortOrder] = useState('0');
+  const [coverImageUrl, setCoverImageUrl] = useState('');
+  const [isMediaDialogOpen, setIsMediaDialogOpen] = useState(false);
   const [loading, setLoading] = useState(isEdit);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleCoverSelect = (selected: { url: string }[]) => {
+    if (selected.length > 0) {
+      setCoverImageUrl(selected[0].url);
+      setIsMediaDialogOpen(false);
+    }
+  };
 
   useEffect(() => {
     if (!groupId) return;
@@ -37,6 +47,7 @@ export default function ProjectGroupForm({ groupId }: ProjectGroupFormProps) {
         setDescription(group.description || '');
         setIsActive(group.isActive !== false);
         setSortOrder(String(group.sortOrder ?? 0));
+        setCoverImageUrl(group.coverImageUrl || '');
       } catch (error: any) {
         toast.error(error.message || 'Failed to load project group');
       } finally {
@@ -61,7 +72,8 @@ export default function ProjectGroupForm({ groupId }: ProjectGroupFormProps) {
         name: name.trim(),
         description: description.trim(),
         isActive,
-        sortOrder: Number(sortOrder) || 0
+        sortOrder: Number(sortOrder) || 0,
+        coverImageUrl: coverImageUrl || null
       };
 
       if (isEdit && groupId) {
@@ -115,6 +127,70 @@ export default function ProjectGroupForm({ groupId }: ProjectGroupFormProps) {
           placeholder='Optional description for this project group'
           rows={4}
           className='rounded-xl border-gray-200 focus:border-[#b07d17] focus:ring-[#b07d17]'
+        />
+      </div>
+
+      <div className='rounded-2xl border border-gray-100 bg-white p-6 shadow-sm'>
+        <Label className='mb-2 block text-sm font-semibold text-gray-900'>
+          Cover Image
+        </Label>
+        <p className='mb-3 text-xs leading-relaxed text-gray-500'>
+          Used for this collection&apos;s card on the Projects page and as the
+          banner on the collection page. Landscape images work best. Leave empty
+          and the website falls back to the first image of a project in this
+          group.
+        </p>
+
+        {coverImageUrl ? (
+          <div className='relative overflow-hidden rounded-2xl border border-gray-100'>
+            <img
+              src={coverImageUrl}
+              alt='Collection cover'
+              className='h-48 w-full object-cover'
+            />
+            <div className='absolute top-3 right-3 flex gap-2'>
+              <Button
+                type='button'
+                size='sm'
+                variant='secondary'
+                onClick={() => setIsMediaDialogOpen(true)}
+                className='h-8 rounded-full bg-white/95 px-3 text-xs font-medium shadow-lg backdrop-blur-sm hover:bg-white'
+              >
+                Replace
+              </Button>
+              <Button
+                type='button'
+                size='sm'
+                variant='secondary'
+                onClick={() => setCoverImageUrl('')}
+                className='h-8 rounded-full bg-white/95 px-3 text-xs font-medium shadow-lg backdrop-blur-sm hover:bg-red-50 hover:text-red-600'
+              >
+                Remove
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <button
+            type='button'
+            onClick={() => setIsMediaDialogOpen(true)}
+            className='group flex w-full flex-col items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 bg-gradient-to-br from-gray-50 to-white py-10 transition-all hover:border-[#b07d17] hover:from-[#b07d17]/5 hover:to-white'
+          >
+            <div className='flex h-12 w-12 items-center justify-center rounded-full bg-white shadow-sm transition-transform group-hover:scale-110'>
+              <ImagePlus className='h-5 w-5 text-gray-400 group-hover:text-[#b07d17]' />
+            </div>
+            <p className='mt-3 text-sm font-medium text-gray-700 group-hover:text-[#b07d17]'>
+              Upload cover image
+            </p>
+            <p className='mt-1 text-xs text-gray-500'>Click to browse files</p>
+          </button>
+        )}
+
+        <MediaSelectionDialog
+          open={isMediaDialogOpen}
+          onOpenChange={setIsMediaDialogOpen}
+          onSelect={handleCoverSelect as any}
+          multiple={false}
+          title='Select Cover Image'
         />
       </div>
 

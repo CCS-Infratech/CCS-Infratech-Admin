@@ -56,55 +56,55 @@ const PREDEFINED_AMENITIES = [
     id: 'car-parks',
     name: 'Car Parks',
     imageUrl:
-      'https://ccs-infratech.s3.amazonaws.com/blogs/1769796244253-car-parks.png'
+      'https://ccs-infratech-635891305240-ap-south-1-an.s3.ap-south-1.amazonaws.com/amenities/parked-car.png'
   },
   {
     id: 'vanity',
     name: 'Vanity',
     imageUrl:
-      'https://ccs-infratech.s3.amazonaws.com/blogs/1769796243105-vanitiy.png'
-  },
+      'https://ccs-infratech-635891305240-ap-south-1-an.s3.ap-south-1.amazonaws.com/amenities/vanity.png'
+    },
   {
     id: 'wardrobe',
     name: 'Wardrobe',
     imageUrl:
-      'https://ccs-infratech.s3.amazonaws.com/blogs/1769796242090-wardrobe.png'
+      'https://ccs-infratech-635891305240-ap-south-1-an.s3.ap-south-1.amazonaws.com/amenities/wardrobe.png'
   },
   {
     id: 'security',
     name: 'Security',
     imageUrl:
-      'https://ccs-infratech.s3.amazonaws.com/blogs/1769795953837-sec.png'
+      'https://ccs-infratech-635891305240-ap-south-1-an.s3.ap-south-1.amazonaws.com/amenities/security-camera.png'
   },
   {
     id: 'gym',
     name: 'Gym',
     imageUrl:
-      'https://ccs-infratech.s3.amazonaws.com/blogs/1769797400978-gym.png'
+      'https://ccs-infratech-635891305240-ap-south-1-an.s3.ap-south-1.amazonaws.com/amenities/dumbbell.png'
   },
   {
     id: 'swimming',
     name: 'Swimming Pool',
     imageUrl:
-      'https://ccs-infratech.s3.amazonaws.com/blogs/1769797404504-swiming.png'
+      'https://ccs-infratech-635891305240-ap-south-1-an.s3.ap-south-1.amazonaws.com/amenities/swimming.png'
   },
   {
     id: 'track',
     name: 'Running Track',
     imageUrl:
-      'https://ccs-infratech.s3.amazonaws.com/blogs/1769797406638-track.png'
+      'https://ccs-infratech-635891305240-ap-south-1-an.s3.ap-south-1.amazonaws.com/amenities/run.png'
   },
   {
     id: 'indoor-games',
     name: 'Indoor Games',
     imageUrl:
-      'https://ccs-infratech.s3.amazonaws.com/blogs/1769797550716-indoor-games.png'
+      'https://ccs-infratech-635891305240-ap-south-1-an.s3.ap-south-1.amazonaws.com/amenities/game.png'
   },
   {
     id: 'multipurpose-hall',
     name: 'Multipurpose Hall',
     imageUrl:
-      'https://ccs-infratech.s3.amazonaws.com/blogs/1769797587516-multipurpose-hall.png'
+      'https://ccs-infratech-635891305240-ap-south-1-an.s3.ap-south-1.amazonaws.com/amenities/high-school.png'
   }
 ];
 
@@ -1198,11 +1198,21 @@ export default function ProjectEditForm({ projectId }: { projectId: string }) {
                     Map URL
                   </Label>
                   <Input
-                    placeholder='Google Maps embed URL'
+                    placeholder='https://www.google.com/maps/embed?pb=...'
                     value={mapUrl}
                     onChange={(e) => setMapUrl(e.target.value)}
                     className='rounded-lg border-gray-200 text-sm focus:border-[#b07d17] focus:ring-[#b07d17] sm:rounded-xl sm:text-base'
                   />
+                  <p className='mt-2 text-xs leading-relaxed text-gray-500'>
+                    Best result: in Google Maps use{' '}
+                    <strong>Share &rarr; Embed a map</strong> and paste only the{' '}
+                    <code>src</code> value. A normal{' '}
+                    <code>google.com/maps/place/...</code> link from the address
+                    bar also works &mdash; the pin is read from its coordinates.
+                    Avoid short <code>maps.app.goo.gl</code> links: they hide the
+                    coordinates, so the map falls back to a rough search on the
+                    project address and shows no pin.
+                  </p>
                 </div>
 
                 <div className='rounded-xl border border-gray-100 bg-white p-4 shadow-sm sm:rounded-2xl sm:p-6'>
