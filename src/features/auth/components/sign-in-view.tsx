@@ -39,8 +39,17 @@ export default function BuilderAdminLoginPage() {
     try {
       const response = await authService.login(formData);
       if (response) {
+        if (
+          response.token &&
+          typeof window !== 'undefined' &&
+          (window.location.hostname === 'localhost' ||
+            window.location.hostname === '127.0.0.1')
+        ) {
+          document.cookie = `authToken=${response.token}; path=/; SameSite=Lax`;
+        }
         toast.success('Logged In Successfully🎉');
         router.push('/dashboard');
+        router.refresh();
       }
     } catch (err: any) {
       const message =
