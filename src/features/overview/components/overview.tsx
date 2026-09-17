@@ -1,148 +1,176 @@
+'use client';
+
 import PageContainer from '@/components/layout/page-container';
 import { Button } from '@/components/ui/button';
 import {
   Card,
+  CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
-  CardTitle,
-  CardAction
+  CardTitle
 } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AreaGraph } from './area-graph';
-import { BarGraph } from './bar-graph';
-import { PieGraph } from './pie-graph';
-import { RecentSales } from './recent-sales';
-import { IconTrendingUp, IconTrendingDown } from '@tabler/icons-react';
-import { Badge } from '@/components/ui/badge';
+
+import {
+  FileText,
+  FolderKanban,
+  Folders,
+  Image as ImageIcon,
+  ArrowRight
+} from 'lucide-react';
+
+import Link from 'next/link';
+
+const sections = [
+  {
+    title: 'Blogs',
+    description: 'Create, edit and manage website blog content.',
+    icon: FileText,
+    href: '/dashboard/blog',
+    action: 'Manage Blogs'
+  },
+  {
+    title: 'Projects',
+    description: 'Manage CCS projects, content, images and project details.',
+    icon: FolderKanban,
+    href: '/dashboard/projects',
+    action: 'Manage Projects'
+  },
+  {
+    title: 'Project Groups',
+    description: 'Organize projects into groups and manage their display.',
+    icon: Folders,
+    href: '/dashboard/project-groups',
+    action: 'Manage Groups'
+  },
+  {
+    title: 'Gallery',
+    description: 'Manage website gallery images and media.',
+    icon: ImageIcon,
+    href: '/dashboard/gallary',
+    action: 'Manage Gallery'
+  }
+];
 
 export default function OverViewPage() {
   return (
     <PageContainer>
-      <div className='flex flex-1 flex-col space-y-2'>
-        <div className='flex items-center justify-between space-y-2'>
+      <div className='flex flex-1 flex-col space-y-8'>
+
+        {/* Header */}
+        <div>
           <h2 className='text-2xl font-bold tracking-tight'>
-            Hi, Welcome back 👋
+            Dashboard
           </h2>
-          <div className='hidden items-center space-x-2 md:flex'>
-            <Button>Download</Button>
+
+          <p className='text-muted-foreground mt-1'>
+            CCS INFRATECH website administration and content management.
+          </p>
+        </div>
+
+        {/* Welcome Card */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Welcome to CCS INFRATECH Admin</CardTitle>
+
+            <CardDescription>
+              Manage your website content and digital presence from one place.
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent>
+            <div className='flex flex-wrap gap-3'>
+              <Button asChild>
+                <Link href='/dashboard/projects'>
+                  Manage Projects
+                  <ArrowRight className='ml-2 h-4 w-4' />
+                </Link>
+              </Button>
+
+              <Button variant='outline' asChild>
+                <Link href='/dashboard/blog'>
+                  Manage Blogs
+                  <ArrowRight className='ml-2 h-4 w-4' />
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Management Sections */}
+        <div>
+          <h3 className='mb-4 text-lg font-semibold'>
+            Content Management
+          </h3>
+
+          <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-4'>
+            {sections.map((section) => {
+              const Icon = section.icon;
+
+              return (
+                <Card
+                  key={section.title}
+                  className='transition-shadow hover:shadow-md'
+                >
+                  <CardHeader>
+                    <Icon className='text-muted-foreground mb-2 h-6 w-6' />
+
+                    <CardTitle className='text-base'>
+                      {section.title}
+                    </CardTitle>
+
+                    <CardDescription>
+                      {section.description}
+                    </CardDescription>
+                  </CardHeader>
+
+                  <CardContent>
+                    <Button
+                      variant='outline'
+                      className='w-full'
+                      asChild
+                    >
+                      <Link href={section.href}>
+                        {section.action}
+
+                        <ArrowRight className='ml-2 h-4 w-4' />
+                      </Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              );
+            })}
           </div>
         </div>
-        <Tabs defaultValue='overview' className='space-y-4'>
-          <TabsList>
-            <TabsTrigger value='overview'>Overview</TabsTrigger>
-            <TabsTrigger value='analytics' disabled>
-              Analytics
-            </TabsTrigger>
-          </TabsList>
-          <TabsContent value='overview' className='space-y-4'>
-            <div className='*:data-[slot=card]:from-primary/5 *:data-[slot=card]:to-card dark:*:data-[slot=card]:bg-card grid grid-cols-1 gap-4 px-4 *:data-[slot=card]:bg-gradient-to-t *:data-[slot=card]:shadow-xs lg:px-6 @xl/main:grid-cols-2 @5xl/main:grid-cols-4'>
-              <Card className='@container/card'>
-                <CardHeader>
-                  <CardDescription>Total Revenue</CardDescription>
-                  <CardTitle className='text-2xl font-semibold tabular-nums @[250px]/card:text-3xl'>
-                    $1,250.00
-                  </CardTitle>
-                  <CardAction>
-                    <Badge variant='outline'>
-                      <IconTrendingUp />
-                      +12.5%
-                    </Badge>
-                  </CardAction>
-                </CardHeader>
-                <CardFooter className='flex-col items-start gap-1.5 text-sm'>
-                  <div className='line-clamp-1 flex gap-2 font-medium'>
-                    Trending up this month <IconTrendingUp className='size-4' />
-                  </div>
-                  <div className='text-muted-foreground'>
-                    Visitors for the last 6 months
-                  </div>
-                </CardFooter>
-              </Card>
-              <Card className='@container/card'>
-                <CardHeader>
-                  <CardDescription>New Customers</CardDescription>
-                  <CardTitle className='text-2xl font-semibold tabular-nums @[250px]/card:text-3xl'>
-                    1,234
-                  </CardTitle>
-                  <CardAction>
-                    <Badge variant='outline'>
-                      <IconTrendingDown />
-                      -20%
-                    </Badge>
-                  </CardAction>
-                </CardHeader>
-                <CardFooter className='flex-col items-start gap-1.5 text-sm'>
-                  <div className='line-clamp-1 flex gap-2 font-medium'>
-                    Down 20% this period <IconTrendingDown className='size-4' />
-                  </div>
-                  <div className='text-muted-foreground'>
-                    Acquisition needs attention
-                  </div>
-                </CardFooter>
-              </Card>
-              <Card className='@container/card'>
-                <CardHeader>
-                  <CardDescription>Active Accounts</CardDescription>
-                  <CardTitle className='text-2xl font-semibold tabular-nums @[250px]/card:text-3xl'>
-                    45,678
-                  </CardTitle>
-                  <CardAction>
-                    <Badge variant='outline'>
-                      <IconTrendingUp />
-                      +12.5%
-                    </Badge>
-                  </CardAction>
-                </CardHeader>
-                <CardFooter className='flex-col items-start gap-1.5 text-sm'>
-                  <div className='line-clamp-1 flex gap-2 font-medium'>
-                    Strong user retention <IconTrendingUp className='size-4' />
-                  </div>
-                  <div className='text-muted-foreground'>
-                    Engagement exceed targets
-                  </div>
-                </CardFooter>
-              </Card>
-              <Card className='@container/card'>
-                <CardHeader>
-                  <CardDescription>Growth Rate</CardDescription>
-                  <CardTitle className='text-2xl font-semibold tabular-nums @[250px]/card:text-3xl'>
-                    4.5%
-                  </CardTitle>
-                  <CardAction>
-                    <Badge variant='outline'>
-                      <IconTrendingUp />
-                      +4.5%
-                    </Badge>
-                  </CardAction>
-                </CardHeader>
-                <CardFooter className='flex-col items-start gap-1.5 text-sm'>
-                  <div className='line-clamp-1 flex gap-2 font-medium'>
-                    Steady performance increase{' '}
-                    <IconTrendingUp className='size-4' />
-                  </div>
-                  <div className='text-muted-foreground'>
-                    Meets growth projections
-                  </div>
-                </CardFooter>
-              </Card>
+
+        {/* Media Management */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Media</CardTitle>
+
+            <CardDescription>
+              Manage gallery and press coverage content.
+            </CardDescription>
+          </CardHeader>
+
+          <CardContent>
+            <div className='flex flex-wrap gap-3'>
+              <Button variant='outline' asChild>
+                <Link href='/dashboard/gallary'>
+                  Gallery
+                  <ArrowRight className='ml-2 h-4 w-4' />
+                </Link>
+              </Button>
+
+              <Button variant='outline' asChild>
+                <Link href='/dashboard/press-coverage'>
+                  Press and Coverage
+                  <ArrowRight className='ml-2 h-4 w-4' />
+                </Link>
+              </Button>
             </div>
-            <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-7'>
-              <div className='col-span-4'>
-                <BarGraph />
-              </div>
-              <Card className='col-span-4 md:col-span-3'>
-                <RecentSales />
-              </Card>
-              <div className='col-span-4'>
-                <AreaGraph />
-              </div>
-              <div className='col-span-4 md:col-span-3'>
-                <PieGraph />
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
+          </CardContent>
+        </Card>
+
       </div>
     </PageContainer>
   );

@@ -1,4 +1,5 @@
 'use client';
+
 import { Badge } from '@/components/ui/badge';
 import { DataTableColumnHeader } from '@/components/ui/table/data-table-column-header';
 import { Column, ColumnDef } from '@tanstack/react-table';
@@ -15,6 +16,27 @@ import { Project } from '../project-listing';
 import { CellAction } from './cell-action';
 import Link from 'next/link';
 import { formatProjectCategory } from '@/constants/projects';
+
+const PUBLIC_SITE_URL = 'https://www.ccsinfratech.com';
+
+function getPublicImageUrl(imageUrl: string | null | undefined) {
+  if (!imageUrl) {
+    return null;
+  }
+
+  if (
+    imageUrl.startsWith('http://') ||
+    imageUrl.startsWith('https://')
+  ) {
+    return imageUrl;
+  }
+
+  if (imageUrl.startsWith('/')) {
+    return `${PUBLIC_SITE_URL}${imageUrl}`;
+  }
+
+  return `${PUBLIC_SITE_URL}/${imageUrl}`;
+}
 
 const PUBLISHED_OPTIONS = [
   { label: 'Published', value: 'true' },
@@ -34,13 +56,20 @@ export const columns: ColumnDef<Project>[] = [
       <DataTableColumnHeader column={column} title='Title' />
     ),
     cell: ({ row }) => {
-      const hasImage = row.original.images && row.original.images.length > 0;
-      const featuredImage = row.original.images.find((img) => img.isFeatured);
-      const imageUrl = featuredImage
+      const hasImage =
+        row.original.images && row.original.images.length > 0;
+
+      const featuredImage = row.original.images.find(
+        (img) => img.isFeatured
+      );
+
+      const rawImageUrl = featuredImage
         ? featuredImage.url
         : hasImage
           ? row.original.images[0].url
-          : '/assets/project-placeholder.jpg';
+          : null;
+
+      const imageUrl = getPublicImageUrl(rawImageUrl);
 
       const id = row.original.id;
 
@@ -51,7 +80,7 @@ export const columns: ColumnDef<Project>[] = [
         >
           <div className='flex gap-3'>
             <div className='relative h-10 w-16 flex-shrink-0 overflow-hidden rounded-md'>
-              {hasImage ? (
+              {hasImage && imageUrl ? (
                 <img
                   src={imageUrl}
                   alt={row.getValue('title')}
@@ -63,10 +92,12 @@ export const columns: ColumnDef<Project>[] = [
                 </div>
               )}
             </div>
+
             <div className='space-y-0.5'>
               <div className='line-clamp-1 text-base font-medium'>
                 {(row.getValue('title') as string).substring(0, 50) + '...'}
               </div>
+
               <div className='text-muted-foreground truncate text-xs'>
                 {row.original.slug.substring(0, 60) + '...'}
               </div>
@@ -83,6 +114,7 @@ export const columns: ColumnDef<Project>[] = [
     },
     enableColumnFilter: true
   },
+
   {
     id: 'group',
     accessorFn: (row) => row.group?.name || 'Ungrouped',
@@ -95,6 +127,7 @@ export const columns: ColumnDef<Project>[] = [
       </span>
     )
   },
+
   {
     id: 'category',
     accessorKey: 'category',
@@ -107,6 +140,7 @@ export const columns: ColumnDef<Project>[] = [
       </Badge>
     )
   },
+
   {
     id: 'published',
     accessorKey: 'published',
@@ -142,6 +176,7 @@ export const columns: ColumnDef<Project>[] = [
       options: PUBLISHED_OPTIONS
     }
   },
+
   {
     id: 'featured',
     accessorKey: 'featured',
@@ -187,6 +222,7 @@ export const columns: ColumnDef<Project>[] = [
       }
 
       const completionDate = new Date(date);
+
       const formattedDate = new Intl.DateTimeFormat('en-US', {
         month: 'short',
         day: 'numeric',
@@ -201,6 +237,7 @@ export const columns: ColumnDef<Project>[] = [
       );
     }
   },
+
   {
     id: 'viewCount',
     accessorKey: 'viewCount',
@@ -210,10 +247,13 @@ export const columns: ColumnDef<Project>[] = [
     cell: ({ row }) => {
       const views = row.getValue<number>('viewCount');
 
-      // Style based on view count
       let viewStyle = 'text-muted-foreground';
-      if (views > 100) viewStyle = 'text-blue-600 font-medium';
-      else if (views > 20) viewStyle = 'text-emerald-600';
+
+      if (views > 100) {
+        viewStyle = 'text-blue-600 font-medium';
+      } else if (views > 20) {
+        viewStyle = 'text-emerald-600';
+      }
 
       return (
         <div className={`flex items-center gap-1.5 ${viewStyle}`}>
@@ -223,6 +263,7 @@ export const columns: ColumnDef<Project>[] = [
       );
     }
   },
+
   {
     id: 'actions',
     cell: ({ row }) => (

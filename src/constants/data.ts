@@ -13,6 +13,14 @@ export type Product = {
 
 export const navItems: NavItem[] = [
   {
+    title: 'Dashboard',
+    url: '/dashboard',
+    icon: 'dashboard',
+    shortcut: ['h', 'h'],
+    isActive: true,
+    items: []
+  },
+  {
     title: 'Blogs',
     url: '/dashboard/blog',
     icon: 'userPen',
@@ -24,16 +32,32 @@ export const navItems: NavItem[] = [
     title: 'Projects',
     url: '/dashboard/projects',
     icon: 'dashboard',
-    isActive: false,
     shortcut: ['d', 'd'],
+    isActive: false,
     items: []
   },
   {
     title: 'Project Groups',
     url: '/dashboard/project-groups',
     icon: 'folders',
-    isActive: false,
     shortcut: ['g', 'g'],
+    isActive: false,
+    items: []
+  },
+  {
+    title: 'Settings',
+    url: '/dashboard/settings',
+    icon: 'settings',
+    shortcut: ['s', 's'],
+    isActive: false,
+    items: []
+  },
+  {
+    title: 'Leadership',
+    url: '/dashboard/leadership',
+    icon: 'userPen',
+    shortcut: ['t', 't'],
+    isActive: false,
     items: []
   },
   {
@@ -41,7 +65,6 @@ export const navItems: NavItem[] = [
     url: '#',
     icon: 'billing',
     isActive: true,
-
     items: [
       {
         title: 'Gallary',

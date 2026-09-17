@@ -1,9 +1,11 @@
 'use client';
+
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger
 } from '@/components/ui/collapsible';
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,6 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
+
 import {
   Sidebar,
   SidebarContent,
@@ -28,34 +31,38 @@ import {
   SidebarMenuSubItem,
   SidebarRail
 } from '@/components/ui/sidebar';
+
 import { UserAvatarProfile } from '@/components/user-avatar-profile';
 import { navItems } from '@/constants/data';
 import { authService } from '@/http/auth';
+
 import {
-  IconBell,
   IconChevronRight,
   IconChevronsDown,
-  IconCreditCard,
   IconLogout,
-  IconPhotoUp,
   IconUserCircle,
   IconLoader2
 } from '@tabler/icons-react';
+
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { toast } from 'sonner';
+import { useAuth } from '@/context/authContext';
 import { Icons } from '../icons';
 import Image from 'next/image';
-import { useState } from 'react'; // Import useState
-import { toast } from 'sonner';
 
 export default function AppSidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
 
+  const { user } = useAuth();
+
   const handleLogout = async () => {
     try {
       setIsLoggingOut(true);
+
       await authService.logout();
 
       toast.success('Logged out successfully');
@@ -63,6 +70,7 @@ export default function AppSidebar() {
       router.push('/auth/sign-in');
     } catch (error) {
       console.error('Logout error:', error);
+      toast.error('Logout failed');
     } finally {
       setIsLoggingOut(false);
     }
@@ -72,19 +80,24 @@ export default function AppSidebar() {
     <Sidebar collapsible='icon'>
       <SidebarHeader className='py-4'>
         <Image
-          src={'/assets/mainlogo.png'}
+          src='/assets/mainlogo.png'
           height={200}
           width={200}
           alt='ccs infratech'
         />
       </SidebarHeader>
+
       <SidebarContent className='overflow-x-hidden'>
         <SidebarGroup>
           <SidebarGroupLabel>Overview</SidebarGroupLabel>
+
           <SidebarMenu>
             {navItems.map((item) => {
-              const Icon = item.icon ? Icons[item.icon] : Icons.logo;
-              return item?.items && item?.items?.length > 0 ? (
+              const Icon = item.icon
+                ? Icons[item.icon]
+                : Icons.logo;
+
+              return item?.items && item.items.length > 0 ? (
                 <Collapsible
                   key={item.title}
                   asChild
@@ -98,13 +111,16 @@ export default function AppSidebar() {
                         isActive={pathname === item.url}
                       >
                         {item.icon && <Icon />}
+
                         <span>{item.title}</span>
+
                         <IconChevronRight className='ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90' />
                       </SidebarMenuButton>
                     </CollapsibleTrigger>
+
                     <CollapsibleContent>
                       <SidebarMenuSub>
-                        {item.items?.map((subItem) => (
+                        {item.items.map((subItem) => (
                           <SidebarMenuSubItem key={subItem.title}>
                             <SidebarMenuSubButton
                               asChild
@@ -138,6 +154,7 @@ export default function AppSidebar() {
           </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
+
       <SidebarFooter>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -148,9 +165,11 @@ export default function AppSidebar() {
                   className='data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground justify-start gap-3'
                 >
                   <UserAvatarProfile showInfo={true} />
+
                   <IconChevronsDown className='ml-auto size-4' />
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
+
               <DropdownMenuContent
                 className='w-(--radix-dropdown-menu-trigger-width) min-w-56 rounded-lg'
                 side='bottom'
@@ -158,8 +177,15 @@ export default function AppSidebar() {
                 sideOffset={4}
               >
                 <DropdownMenuLabel className='p-0 font-normal'>
-                  <div className='px-1 py-1.5'></div>
+                  <div className='px-1 py-1.5'>
+                    {user?.role && (
+                      <p className='text-muted-foreground px-1 text-xs capitalize'>
+                        Role: {user.role}
+                      </p>
+                    )}
+                  </div>
                 </DropdownMenuLabel>
+
                 <DropdownMenuSeparator />
 
                 <DropdownMenuGroup>
@@ -170,7 +196,9 @@ export default function AppSidebar() {
                     Profile
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
+
                 <DropdownMenuSeparator />
+
                 <DropdownMenuItem
                   onClick={handleLogout}
                   disabled={isLoggingOut}
@@ -180,6 +208,7 @@ export default function AppSidebar() {
                   ) : (
                     <IconLogout className='mr-2 h-4 w-4 text-red-400' />
                   )}
+
                   {isLoggingOut ? 'Logging out...' : 'Logout'}
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -187,6 +216,7 @@ export default function AppSidebar() {
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarFooter>
+
       <SidebarRail />
     </Sidebar>
   );
