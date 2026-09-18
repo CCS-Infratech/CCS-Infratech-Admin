@@ -121,7 +121,7 @@ const GalleryCard = ({
           )}
         >
           <span className='sr-only'>
-            {gallery.isActive ? 'Active' : 'Draft'}
+            {gallery.isActive ? 'Published' : 'Draft'}
           </span>
         </div>
       </div>
@@ -166,7 +166,7 @@ const GalleryCard = ({
                   className='flex w-full items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100'
                 >
                   <IconEdit className='mr-2 h-4 w-4' />
-                  Edit Gallery
+                  Edit Event
                 </Link>
               </div>
             )}
@@ -180,7 +180,7 @@ const GalleryCard = ({
         <div className='mt-auto flex items-center justify-between text-xs text-gray-400'>
           <div className='flex items-center'>
             <span className='font-medium'>
-              {gallery.images?.length || 0} image
+              {gallery.images?.length || 0} photo
               {gallery.images?.length !== 1 ? 's' : ''}
             </span>
           </div>
@@ -266,10 +266,10 @@ const GalleryListingPage = () => {
           <IconPhoto className='h-8 w-8 text-gray-400' stroke={1.5} />
         </div>
         <h3 className='mt-6 text-base font-medium text-gray-700'>
-          Your gallery collection is empty
+          No events or campaigns yet
         </h3>
         <p className='mt-2 max-w-md text-center text-sm text-gray-500'>
-          Create your first gallery to organize and showcase your images
+          Create your first event or campaign to showcase your photos
           beautifully.
         </p>
         <Link
@@ -280,7 +280,7 @@ const GalleryListingPage = () => {
           )}
         >
           <IconPlus className='mr-1.5 h-4 w-4' stroke={2} />
-          New Gallery
+          New Event
         </Link>
       </div>
     );
@@ -308,8 +308,8 @@ export default function GalleryPage() {
       <div className='flex flex-1 flex-col space-y-6'>
         <div className='flex flex-col items-start justify-between space-y-4 pb-2 sm:flex-row sm:space-y-0 sm:pb-0'>
           <Heading
-            title='Galleries'
-            description='Create and manage your image collections.'
+            title='Events & Campaigns'
+            description='Create and manage your events and campaigns.'
           />
           <Link
             href='/dashboard/gallary/new'
@@ -319,7 +319,7 @@ export default function GalleryPage() {
             )}
           >
             <IconPlus className='mr-2 h-4 w-4' stroke={2} />
-            New Gallery
+            New Event
           </Link>
         </div>
         <Separator className='bg-gray-100' />

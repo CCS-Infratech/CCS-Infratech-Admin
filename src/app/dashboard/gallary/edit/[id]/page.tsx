@@ -94,7 +94,7 @@ const GalleryImageItem = ({
       <div className='relative h-24 w-24 flex-shrink-0 overflow-hidden rounded-md bg-gray-100'>
         <img
           src={image.url}
-          alt={image.alt || 'Gallery image'}
+          alt={image.alt || 'Event photo'}
           className='h-full w-full object-cover'
         />
 
@@ -140,7 +140,7 @@ const GalleryImageItem = ({
         aria-label={`Remove ${image.filename}`}
       >
         <IconX className='h-4 w-4' />
-        <span className='sr-only'>Remove image</span>
+        <span className='sr-only'>Remove event photo</span>
       </button>
     </div>
   );
@@ -193,14 +193,14 @@ const GalleryEditForm = ({
             : null;
 
         if (!galleryData) {
-          throw new Error('No gallery data returned');
+          throw new Error('No event data returned');
         }
 
         setGallery(galleryData);
       } catch (err) {
         console.error('Error fetching gallery:', err);
-        setError('Failed to load gallery');
-        toast.error('Failed to load gallery details');
+        setError('Failed to load event');
+        toast.error('Failed to load event details');
       } finally {
         setLoading(false);
       }
@@ -292,10 +292,10 @@ const GalleryEditForm = ({
           images: prev.images.filter((image) => image.id !== id)
         }));
 
-        toast.success('Image removed from gallery');
+        toast.success('Event photo removed');
       } catch (error) {
         console.error('Error deleting image:', error);
-        toast.error('Failed to remove image');
+        toast.error('Failed to remove event photo');
       }
     },
     [isNewGallery]
@@ -308,12 +308,12 @@ const GalleryEditForm = ({
 
       // Validate required fields
       if (!gallery.name) {
-        toast.error('Gallery name is required');
+        toast.error('Event title is required');
         return;
       }
 
       if (!gallery.slug) {
-        toast.error('Gallery slug is required');
+        toast.error('Event URL could not be generated');
         return;
       }
 
@@ -339,7 +339,7 @@ const GalleryEditForm = ({
       await onSave(gallery);
     } catch (err) {
       console.error('Error saving gallery:', err);
-      toast.error('Failed to save gallery');
+      toast.error('Failed to save event');
     } finally {
       setSaving(false);
     }
@@ -364,7 +364,7 @@ const GalleryEditForm = ({
         <div className='rounded-lg bg-white p-8 shadow-sm'>
           <h3 className='text-center text-lg font-medium'>{error}</h3>
           <p className='mt-2 text-center text-sm text-gray-500'>
-            We couldn't load the gallery details.
+            We couldn't load the event details.
           </p>
           <button
             onClick={() => router.back()}
@@ -388,27 +388,27 @@ const GalleryEditForm = ({
         onOpenChange={setMediaDialogOpen}
         onSelect={handleMediaSelection}
         multiple={true}
-        title='Select Images for Gallery'
+        title='Select Event Photos'
       />
 
       <div className='space-y-6'>
         <div className='space-y-4'>
-          <h2 className='text-xl font-medium'>Gallery Details</h2>
+          <h2 className='text-xl font-medium'>Event Details</h2>
 
           <div className='grid grid-cols-1 gap-4 sm:grid-cols-2'>
             <div className='space-y-2'>
-              <Label htmlFor='name'>Gallery Name</Label>
+              <Label htmlFor='name'>Event Title</Label>
               <Input
                 id='name'
                 name='name'
                 value={gallery.name}
                 onChange={handleInputChange}
-                placeholder='Enter gallery name'
+                placeholder='Enter event title'
                 required
               />
             </div>
 
-            <div className='space-y-2'>
+            <div className='hidden'>
               <Label htmlFor='slug'>Slug</Label>
               <div className='flex gap-2'>
                 <Input
@@ -416,7 +416,7 @@ const GalleryEditForm = ({
                   name='slug'
                   value={gallery.slug}
                   onChange={handleInputChange}
-                  placeholder='gallery-slug'
+                  placeholder='event-slug'
                   required
                 />
                 <Button
@@ -437,7 +437,7 @@ const GalleryEditForm = ({
                 name='description'
                 value={gallery.description}
                 onChange={handleInputChange}
-                placeholder='Enter gallery description'
+                placeholder='Enter event description'
                 className='min-h-24'
               />
             </div>
@@ -448,7 +448,7 @@ const GalleryEditForm = ({
                 checked={gallery.isActive}
                 onCheckedChange={handleSwitchChange}
               />
-              <Label htmlFor='isActive'>Gallery is active</Label>
+              <Label htmlFor='isActive'>Event is published</Label>
             </div>
           </div>
         </div>
@@ -457,7 +457,7 @@ const GalleryEditForm = ({
 
         <div className='space-y-4'>
           <div className='flex items-center justify-between'>
-            <h2 className='text-xl font-medium'>Gallery Images</h2>
+            <h2 className='text-xl font-medium'>Event Photos</h2>
 
             <div>
               <Button
@@ -466,7 +466,7 @@ const GalleryEditForm = ({
                 variant='outline'
               >
                 <IconPhoto className='mr-2 h-4 w-4' />
-                Select Images
+                Select Event Photos
               </Button>
             </div>
           </div>
@@ -478,10 +478,10 @@ const GalleryEditForm = ({
                   <IconPhoto className='h-6 w-6 text-gray-400' />
                 </div>
                 <p className='mt-4 text-sm font-medium text-gray-600'>
-                  No images added yet
+                  No event photos added yet
                 </p>
                 <p className='mt-1 text-xs text-gray-500'>
-                  Select images to display in this gallery
+                  Select photos to display for this event
                 </p>
                 <Button
                   className='mt-4'
@@ -490,7 +490,7 @@ const GalleryEditForm = ({
                   type='button'
                 >
                   <IconPlus className='mr-2 h-4 w-4' />
-                  Add Images
+                  Add Event Photos
                 </Button>
               </div>
             ) : (
@@ -547,32 +547,32 @@ export default function GalleryEditPage() {
 
       if (isNewGallery) {
         await galleryService.createGallery(galleryData);
-        toast.success('Gallery created successfully');
+        toast.success('Event created successfully');
       } else {
         await galleryService.updateGallery(galleryId, galleryData);
-        toast.success('Gallery updated successfully');
+        toast.success('Event updated successfully');
       }
 
       // Redirect to listing page
       router.push('/dashboard/gallary');
     } catch (err) {
       console.error('Error saving gallery:', err);
-      toast.error('Failed to save gallery');
+      toast.error('Failed to save event');
     } finally {
       setSaving(false);
     }
   };
 
   const handleDelete = useCallback(async () => {
-    if (!isNewGallery && confirm(`Delete this gallery permanently?`)) {
+    if (!isNewGallery && confirm(`Delete this event permanently?`)) {
       try {
         setSaving(true);
         await galleryService.deleteGallery(galleryId);
-        toast.success('Gallery deleted successfully');
+        toast.success('Event deleted successfully');
         router.push('/dashboard/gallary');
       } catch (error) {
         console.error('Error deleting gallery:', error);
-        toast.error('Failed to delete gallery');
+        toast.error('Failed to delete event');
       } finally {
         setSaving(false);
       }
@@ -589,11 +589,11 @@ export default function GalleryEditPage() {
       <div className='flex flex-1 flex-col space-y-6'>
         <div className='flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0'>
           <Heading
-            title={isNewGallery ? 'Create Gallery' : 'Edit Gallery'}
+            title={isNewGallery ? 'Create Event & Campaign' : 'Edit Event & Campaign'}
             description={
               isNewGallery
-                ? 'Create a new image gallery.'
-                : 'Edit gallery details and manage images.'
+                ? 'Create a new event or campaign.'
+                : 'Edit event details and manage photos.'
             }
           />
 
@@ -626,7 +626,7 @@ export default function GalleryEditPage() {
                 <div className='mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent'></div>
               )}
               <Save className='mr-2 h-4 w-4' />
-              {isNewGallery ? 'Create Gallery' : 'Save Changes'}
+              {isNewGallery ? 'Create Event' : 'Save Changes'}
             </Button>
           </div>
         </div>

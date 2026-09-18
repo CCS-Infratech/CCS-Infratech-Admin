@@ -101,10 +101,10 @@ const GalleryCreator: React.FC = () => {
 
       setGallery({ name: '', description: '', slug: '' });
       setSelectedImages([]);
-      toast.success('Gallery created successfully!');
+      toast.success('Event created successfully!');
     } catch (error) {
       console.error('Error creating gallery:', error);
-      alert('Failed to create gallery');
+      alert('Failed to create event');
     } finally {
       setIsSubmitting(false);
     }
@@ -113,11 +113,11 @@ const GalleryCreator: React.FC = () => {
   return (
     <div className='hide-scrollbar mb-8 h-screen max-w-full overflow-auto px-9 py-16 font-sans'>
       <h1 className='mb-3 text-4xl font-bold text-gray-900'>
-        Create a Gallery
+        Create an Event & Campaign
       </h1>
       <p className='mb-16 max-w-xl text-lg text-gray-600'>
         Share your visual story with the world through a carefully curated
-        gallery of images.
+        event photos.
       </p>
 
       <form onSubmit={handleSubmit} className='space-y-12'>
@@ -127,7 +127,7 @@ const GalleryCreator: React.FC = () => {
               htmlFor='name'
               className='block text-base font-medium text-gray-700'
             >
-              Gallery Title
+              Event Title
             </label>
             <input
               type='text'
@@ -167,17 +167,17 @@ const GalleryCreator: React.FC = () => {
           <div className='flex cursor-pointer flex-col items-center'>
             <IconPhoto className='mb-5 h-14 w-14 text-gray-400 transition-transform group-hover:scale-110 group-hover:text-gray-600' />
             <h3 className='mb-2 font-serif text-xl text-gray-800'>
-              Select images for your gallery
+              Select photos for your event
             </h3>
             <p className='mb-6 max-w-md text-base text-gray-500'>
-              Choose from your media library to showcase in your gallery. You
+              Choose photos from your media library to showcase at this event. You
               can add captions and alt text for each image.
             </p>
             <Button
               type='button'
               className='px-6 py-3 transition-all hover:shadow-md'
             >
-              Select Images
+              Select Event Photos
             </Button>
           </div>
         </div>
@@ -187,14 +187,14 @@ const GalleryCreator: React.FC = () => {
           onOpenChange={setIsMediaDialogOpen}
           onSelect={handleImageSelection}
           multiple={true}
-          title='Select Gallery Images'
+          title='Select Event Photos'
         />
 
         {selectedImages.length > 0 && (
           <div className='pt-10'>
             <div className='mb-10 flex items-baseline justify-between border-b border-gray-200 pb-4'>
               <h2 className='font-serif text-2xl font-semibold text-gray-900'>
-                Gallery Images
+                Event Photos
               </h2>
               <span className='text-gray-500'>
                 {selectedImages.length} image
@@ -211,7 +211,7 @@ const GalleryCreator: React.FC = () => {
                   <div className='relative aspect-[4/3] overflow-hidden rounded-lg bg-gray-50'>
                     <img
                       src={img.url}
-                      alt={img.alt || 'Gallery preview'}
+                      alt={img.alt || 'Event photo preview'}
                       className='h-full w-full object-cover transition-transform duration-300 group-hover:scale-105'
                     />
                     <div className='absolute inset-0 bg-black opacity-0 transition-opacity group-hover:opacity-10'></div>
@@ -288,13 +288,13 @@ const GalleryCreator: React.FC = () => {
           >
             {isSubmitting ? (
               <>
-                <span className='opacity-0'>Publish Gallery</span>
+                <span className='opacity-0'>Publish Event</span>
                 <span className='absolute inset-0 flex items-center justify-center'>
                   Publishing...
                 </span>
               </>
             ) : (
-              'Publish Gallery'
+              'Publish Event'
             )}
           </button>
 
@@ -302,10 +302,9 @@ const GalleryCreator: React.FC = () => {
             gallery.slug === '' ||
             selectedImages.length === 0) && (
             <p className='mt-4 text-sm text-gray-500'>
-              {gallery.name === '' && 'Please add a title for your gallery. '}
-              {gallery.slug === '' && 'Please provide a URL slug. '}
+              {gallery.name === '' && 'Please add an event title. '}
               {selectedImages.length === 0 &&
-                'Select at least one image to create your gallery.'}
+                'Select at least one photo to create your event.'}
             </p>
           )}
         </div>

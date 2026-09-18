@@ -13,7 +13,6 @@ import {
   CardHeader,
   CardTitle
 } from '@/components/ui/card';
-
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -56,6 +55,8 @@ import {
   CreateLeadership,
   UpdateLeadership
 } from '@/http/leadership';
+
+import { MediaSelectionDialog } from '@/components/modal/media-gallary';
 
 const PUBLIC_SITE_URL = 'https://www.ccsinfratech.com';
 
@@ -118,6 +119,7 @@ export default function LeadershipPage() {
     useState<CreateLeadership>(emptyForm);
 
   const [saving, setSaving] = useState(false);
+  const [mediaDialogOpen, setMediaDialogOpen] = useState(false);
 
   const [deleteDialogOpen, setDeleteDialogOpen] =
     useState(false);
@@ -200,6 +202,17 @@ export default function LeadershipPage() {
       ...current,
       [field]: value
     }));
+  };
+
+  const handleMediaSelection = (selectedImages: { url: string }[]) => {
+    if (selectedImages.length === 0) {
+      return;
+    }
+
+    updateField('imageUrl', selectedImages[0].url);
+    setMediaDialogOpen(false);
+
+    toast.success('Leadership image selected');
   };
 
   const handleSubmit = async (
@@ -624,39 +637,47 @@ export default function LeadershipPage() {
             {/* Image */}
             <div className='grid gap-2'>
               <Label htmlFor='imageUrl'>
-                Image URL
+                Leadership Image
               </Label>
 
-              <Input
-                id='imageUrl'
-                value={form.imageUrl ?? ''}
-                onChange={(event) =>
-                  updateField(
-                    'imageUrl',
-                    event.target.value
-                  )
-                }
-                placeholder='/images/person.png'
-              />
+              <div className='flex flex-col gap-2 sm:flex-row'>
+                <Input
+                  id='imageUrl'
+                  value={form.imageUrl ?? ''}
+                  onChange={(event) =>
+                    updateField(
+                      'imageUrl',
+                      event.target.value
+                    )
+                  }
+                  placeholder='/images/person.png or image URL'
+                  className='flex-1'
+                />
+
+                <Button
+                  type='button'
+                  variant='outline'
+                  onClick={() => setMediaDialogOpen(true)}
+                  disabled={saving}
+                  className='shrink-0'
+                >
+                  Select Image
+                </Button>
+              </div>
 
               <p className='text-muted-foreground text-xs'>
-                Use a CCS website path such as /images/person.png
-                or a full public image URL.
+                Select an existing image or upload a new one from the media
+                library. You can also enter an image URL manually.
               </p>
 
               {form.imageUrl && (
-                <div className='mt-2 overflow-hidden rounded-lg border'>
+                <div className='mt-2 overflow-hidden rounded-lg border bg-muted/20'>
                   <img
-                    src={
-                      getPublicImageUrl(
-                        form.imageUrl
-                      ) ?? ''
-                    }
-                    alt='Preview'
-                    className='h-32 w-full object-cover'
+                    src={getPublicImageUrl(form.imageUrl) ?? ''}
+                    alt='Leadership image preview'
+                    className='h-40 w-full object-cover'
                     onError={(event) => {
-                      event.currentTarget.style.display =
-                        'none';
+                      event.currentTarget.style.display = 'none';
                     }}
                   />
                 </div>
@@ -781,6 +802,14 @@ export default function LeadershipPage() {
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Leadership Image Selection */}
+      <MediaSelectionDialog
+        open={mediaDialogOpen}
+        onOpenChange={setMediaDialogOpen}
+        onSelect={handleMediaSelection}
+        title='Select Leadership Image'
+      />
 
       {/* Delete Dialog */}
       <AlertDialog

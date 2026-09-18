@@ -43,11 +43,11 @@ const sections = [
     action: 'Manage Groups'
   },
   {
-    title: 'Gallery',
-    description: 'Manage website gallery images and media.',
+    title: 'Events & Campaigns',
+    description: 'Manage website events, campaigns, photos, and media.',
     icon: ImageIcon,
     href: '/dashboard/gallary',
-    action: 'Manage Gallery'
+    action: 'Manage Events & Campaigns'
   }
 ];
 
@@ -148,7 +148,7 @@ export default function OverViewPage() {
             <CardTitle>Media</CardTitle>
 
             <CardDescription>
-              Manage gallery and press coverage content.
+              Manage events, campaigns, and press coverage content.
             </CardDescription>
           </CardHeader>
 
@@ -156,7 +156,7 @@ export default function OverViewPage() {
             <div className='flex flex-wrap gap-3'>
               <Button variant='outline' asChild>
                 <Link href='/dashboard/gallary'>
-                  Gallery
+                  Events & Campaigns
                   <ArrowRight className='ml-2 h-4 w-4' />
                 </Link>
               </Button>

@@ -15,7 +15,7 @@ export const galleryService = {
       sortOrder?: number;
     }>;
   }): Promise<any> => {
-    const response = await api.post<any>('/gallary/create', galleryData);
+    const response = await api.post<any>('/gallary', galleryData);
     return response.data;
   },
 

@@ -67,7 +67,7 @@ export const navItems: NavItem[] = [
     isActive: true,
     items: [
       {
-        title: 'Gallary',
+        title: 'Events & Campaigns',
         url: '/dashboard/gallary',
         icon: 'userPen',
         shortcut: ['m', 'm']
