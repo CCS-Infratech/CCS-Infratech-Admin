@@ -73,6 +73,12 @@ export const navItems: NavItem[] = [
         shortcut: ['m', 'm']
       },
       {
+        title: 'Walkthrough',
+        url: '/dashboard/walkthrough',
+        icon: 'media',
+        shortcut: ['m', 'w']
+      },
+      {
         title: 'Press and Coverage',
         url: '/dashboard/press-coverage',
         icon: 'userPen',
