@@ -1,137 +1,128 @@
-<p align="center">
-<h1 align="center">CCS Infratech</h1>
+# CCS Infratech Admin
 
-<div align="center">Built with the Next.js 16 App Router, Tailwind CSS &amp; Shadcn UI components</div>
+Internal dashboard for managing CCS Infratech content — blogs, projects, project groups, events, press, site settings, leadership, and leads.
 
-<br />
+**Repository:** [github.com/CCS-Infratech/CCS-Infratech-Admin](https://github.com/CCS-Infratech/CCS-Infratech-Admin)
 
-## Overview
+Related apps:
 
-This is an **admin dashboard starter template** built with **Next.js 16, Shadcn UI, and Tailwind CSS**.
+- API — [CCS-Infratech-Backend](https://github.com/CCS-Infratech/CCS-Infratech-Backend)
+- Public site — [CCS-Infratech-Frontend](https://github.com/CCS-Infratech/CCS-Infratech-Frontend)
 
-It gives you a production-ready **dashboard UI** with authentication, charts, tables, forms, and a feature-based folder structure, perfect for **SaaS apps, internal tools, and admin panels**.
+---
 
-### Tech Stack
+## What it includes
 
-This template uses the following stack:
+- Email / password login against the backend JWT API
+- Cookie-guarded dashboard routes (`authToken`)
+- Dashboard hub that jumps into each CMS section
+- Blogs — list, create, edit, rich text (Tiptap)
+- Projects — listing plus a multi-step create/edit form (overview, specs, amenities, plans, gallery)
+- Project groups — collections that the public site uses
+- Events & Campaigns (gallery CMS) and press coverage
+- Website settings (contact, offices, social, branding)
+- Leadership / partner profiles shown on the public About page
+- Lead inbox — filter, update status, delete enquiries
+- S3 image picker / upload
+- Data tables, forms, and a sidebar layout
+- Next.js 16 App Router, Tailwind CSS v4, shadcn/ui, Zustand, Zod, React Hook Form
 
-- Framework - [Next.js 16](https://nextjs.org/16)
-- Language - [TypeScript](https://www.typescriptlang.org)
-- Auth - [Clerk](https://go.clerk.com/ILdYhn7)
-- Error tracking - [Sentry](https://sentry.io/for/nextjs/?utm_source=github&utm_medium=paid-community&utm_campaign=general-fy26q2-nextjs&utm_content=github-banner-project-tryfree)
-- Styling - [Tailwind CSS v4](https://tailwindcss.com)
-- Components - [Shadcn-ui](https://ui.shadcn.com)
-- Schema Validations - [Zod](https://zod.dev)
-- State Management - [Zustand](https://zustand-demo.pmnd.rs)
-- Search params state manager - [Nuqs](https://nuqs.47ng.com/)
-- Tables - [Tanstack Data Tables](https://ui.shadcn.com/docs/components/data-table) • [Dice table](https://www.diceui.com/docs/components/data-table)
-- Forms - [React Hook Form](https://ui.shadcn.com/docs/components/form)
-- Command+k interface - [kbar](https://kbar.vercel.app/)
-- Linting - [ESLint](https://eslint.org)
-- Pre-commit Hooks - [Husky](https://typicode.github.io/husky/)
-- Formatting - [Prettier](https://prettier.io)
+---
 
-_If you are looking for a Tanstack start dashboard template, here is the [repo](https://git.new/tanstack-start-dashboard)._
+## Architecture
 
-## Features
-
-- 🧱 Pre-built **admin dashboard layout** (sidebar, header, content area)
-
-- 📊 **Analytics overview** page with cards and charts
-
-- 📋 **Data tables** with server-side search, filter & pagination
-
-- 🔐 **Authentication** & user management via Clerk
-
-- 🧩 **Shadcn UI components** with Tailwind CSS styling
-
-- 🧠 Feature-based folder structure for scalable projects
-
-- ⚙️ Ready for **SaaS dashboards**, internal tools, and client admin panels
-
-## Use Cases
-
-You can use this Next.js + Shadcn UI dashboard starter to build:
-
-- SaaS admin dashboards
-
-- Internal tools & operations panels
-
-- Analytics dashboards
-
-- Client project admin panels
-
-- Boilerplate for new Next.js admin UI projects
-
-## Feature based organization
-
-```plaintext
-src/
-├── app/ # Next.js App Router directory
-│ ├── (auth)/ # Auth route group
-│ │ ├── (signin)/
-│ ├── (dashboard)/ # Dashboard route group
-│ │ ├── layout.tsx
-│ │ ├── loading.tsx
-│ │ └── page.tsx
-│ └── api/ # API routes
-│
-├── components/ # Shared components
-│ ├── ui/ # UI components (buttons, inputs, etc.)
-│ └── layout/ # Layout components (header, sidebar, etc.)
-│
-├── features/ # Feature-based modules
-│ ├── feature/
-│ │ ├── components/ # Feature-specific components
-│ │ ├── actions/ # Server actions
-│ │ ├── schemas/ # Form validation schemas
-│ │ └── utils/ # Feature-specific utilities
-│ │
-├── lib/ # Core utilities and configurations
-│ ├── auth/ # Auth configuration
-│ ├── db/ # Database utilities
-│ └── utils/ # Shared utilities
-│
-├── hooks/ # Custom hooks
-│ └── use-debounce.ts
-│
-├── stores/ # Zustand stores
-│ └── dashboard-store.ts
-│
-└── types/ # TypeScript types
-└── index.ts
+```
+Browser  ─►  Next.js Admin (:3002)
+                │
+                ├─ proxy.ts   checks authToken cookie
+                │     /auth/sign-in  ↔  /dashboard/*
+                │
+                └─ Axios (credentials)  ─►  Backend /api/v1
+                                              ├─ /auth/login, /auth/logout
+                                              ├─ /blog, /projects, /project-groups
+                                              ├─ /gallary, /press
+                                              ├─ /settings, /leadership, /leads
+                                              └─ /images  (S3)
 ```
 
-## Getting Started
+```
+src/
+├── app/
+│   ├── auth/sign-in/         # Login
+│   └── dashboard/            # Protected CMS pages
+│       ├── blog/
+│       ├── projects/
+│       ├── project-groups/
+│       ├── gallary/          # Events & Campaigns
+│       ├── press-coverage/
+│       ├── settings/
+│       ├── leadership/
+│       ├── leads/
+│       └── profile/
+├── features/                 # Feature modules (forms, tables, views)
+├── http/                     # Axios instance + API clients
+├── components/               # Shared UI and layout
+├── context/authContext.tsx   # Session state
+└── proxy.ts                  # Auth redirect for dashboard routes
+```
 
-> [!NOTE]  
-> This admin dashboard starter uses **Next.js 16 (App Router)** with **React 19** and **Shadcn UI**. Follow these steps to run it locally:
+The dashboard runs on port **3002** so it can sit next to the public site on `3000`. On 401 the Axios client logs out and sends the user back to `/auth/sign-in`.
 
-- `bun install`
-- Create a `.env.local` file by copying the example environment file:
-  `cp env.example.txt .env.local`
-- Add the required environment variables to the `.env.local` file.
-- `bun run dev`
+---
 
-##### Environment Configuration Setup
+## How to run
 
-To configure the environment for this project, refer to the `env.example.txt` file. This file contains the necessary environment variables required for authentication and error tracking.
+**Requirements:** Node.js 20+, bun or pnpm, and a running [backend](https://github.com/CCS-Infratech/CCS-Infratech-Backend) with an admin user (`npm run prisma:seed` on the API).
 
-You should now be able to access the application at http://localhost:3000.
+```bash
+git clone https://github.com/CCS-Infratech/CCS-Infratech-Admin.git
+cd CCS-Infratech-Admin
+bun install
+# or: pnpm install
+```
 
-> [!WARNING]
-> After cloning or forking the repository, be cautious when pulling or syncing with the latest changes, as this may result in breaking conflicts.
+Create a `.env` (or `.env.local`) in the project root:
 
-Cheers! 🥂
+```env
+NEXT_PUBLIC_API_URL=http://localhost:8000
+```
 
-<!--
+```bash
+bun run dev
+# or: pnpm dev
+```
 
-SEO keywords:
+Open [http://localhost:3002](http://localhost:3002). You will be redirected to `/auth/sign-in`.
 
-nextjs admin dashboard, nextjs dashboard template, shadcn ui dashboard,
+Sign in with the admin account created by the backend seed. After login the app stores `authToken` and opens the dashboard hub. The root `/` route redirects to `/dashboard/blog`.
 
-admin dashboard starter, dashboard ui template, nextjs shadcn admin panel,
+### Production
 
-react admin dashboard, tailwind css admin dashboard
+```bash
+bun run build
+bun run start
+```
 
--->
+Set `NEXT_PUBLIC_API_URL` to the deployed API (`https://api.ccsinfratech.com`). The backend CORS list already includes `https://admin.ccsinfratech.com`.
+
+---
+
+## Dashboard routes
+
+| Path | Purpose |
+| --- | --- |
+| `/auth/sign-in` | Admin login |
+| `/dashboard` | CMS hub |
+| `/dashboard/blog` | Blog list / editor |
+| `/dashboard/projects` | Project list / editor |
+| `/dashboard/project-groups` | Collections |
+| `/dashboard/gallary` | Events & Campaigns |
+| `/dashboard/press-coverage` | Press items |
+| `/dashboard/settings` | Public website contact / branding |
+| `/dashboard/leadership` | Leadership / partner profiles |
+| `/dashboard/leads` | Enquiry inbox |
+| `/dashboard/profile` | Profile |
+
+---
+
+CCS Infratech

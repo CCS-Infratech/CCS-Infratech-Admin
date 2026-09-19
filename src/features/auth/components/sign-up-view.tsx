@@ -56,7 +56,7 @@ export default function SignUpViewPage({ stars }: { stars: number }) {
           <Link
             className={cn('group inline-flex hover:text-yellow-200')}
             target='_blank'
-            href={'https://github.com/kiranism/next-shadcn-dashboard-starter'}
+            href={'https://github.com/CCS-Infratech/CCS-Infratech-Admin'}
           >
             <div className='flex items-center'>
               <GitHubLogoIcon className='size-4' />
