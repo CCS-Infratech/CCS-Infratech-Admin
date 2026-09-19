@@ -11,16 +11,15 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { BlogCoverImageField } from './blog-cover-image';
 
 export default function BlogViewPage({ blogId }: { blogId: string }) {
   const [title, setTitle] = useState('');
   const [summary, setSummary] = useState('');
   const [published, setPublished] = useState(false);
   const [content, setContent] = useState('');
-  const [images, setImages] = useState<any[]>([]);
-  const [imageToDelete, setImageToDelete] = useState<string | null>(null);
+  const [coverImageUrl, setCoverImageUrl] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
@@ -36,7 +35,7 @@ export default function BlogViewPage({ blogId }: { blogId: string }) {
           setSummary(blog.summary || '');
           setContent(blog.content || '');
           setPublished(blog.published || false);
-          setImages(blog.images || []);
+          setCoverImageUrl(blog.images?.[0]?.url || '');
         }
       } catch (error) {
         console.error('Error fetching blog:', error);
@@ -71,7 +70,8 @@ export default function BlogViewPage({ blogId }: { blogId: string }) {
         title,
         content,
         summary,
-        published
+        published,
+        coverImageUrl: coverImageUrl || null
       });
 
       toast.success('Blog post updated successfully!');
@@ -182,6 +182,11 @@ export default function BlogViewPage({ blogId }: { blogId: string }) {
                 <Label htmlFor='published'>Published</Label>
               </div>
             </div>
+
+            <BlogCoverImageField
+              value={coverImageUrl}
+              onChange={setCoverImageUrl}
+            />
 
             <div className='space-y-2'>
               <Label htmlFor='content'>Content</Label>

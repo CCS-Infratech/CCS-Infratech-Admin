@@ -17,12 +17,14 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { BlogCoverImageField } from './blog-cover-image';
 
 export default function ProductForm({ pageTitle }: { pageTitle: string }) {
   const [title, setTitle] = useState('');
   const [summary, setSummary] = useState('');
   const [published, setPublished] = useState(false);
   const [content, setContent] = useState('');
+  const [coverImageUrl, setCoverImageUrl] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const router = useRouter();
 
@@ -48,19 +50,21 @@ export default function ProductForm({ pageTitle }: { pageTitle: string }) {
         title,
         content,
         summary,
-        published
+        published,
+        coverImageUrl: coverImageUrl || null
       });
 
       toast.success('Your blog post has been created successfully!');
 
-      // Reset form
       setTitle('');
       setSummary('');
       setContent('');
+      setCoverImageUrl('');
       setPublished(false);
       router.push('/dashboard/blog');
     } catch (error) {
       console.error('Failed to create blog post:', error);
+      toast.error('Failed to create blog post');
     } finally {
       setIsSubmitting(false);
     }
@@ -112,6 +116,12 @@ export default function ProductForm({ pageTitle }: { pageTitle: string }) {
               <Label htmlFor='published'>Publish immediately</Label>
             </div>
           </div>
+
+          <BlogCoverImageField
+            value={coverImageUrl}
+            onChange={setCoverImageUrl}
+          />
+
           <div className='space-y-2'>
             <Label htmlFor='content'>Content</Label>
             <div className='rounded-md border'>

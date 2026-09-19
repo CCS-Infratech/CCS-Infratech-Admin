@@ -29,10 +29,17 @@ const ImageButton = () => {
       />
       <MediaSelectionDialog
         open={open}
-        onOpenChange={handleClose}
+        onOpenChange={(isOpen) => {
+          if (isOpen) {
+            handleOpen();
+          } else {
+            handleClose();
+          }
+        }}
         onSelect={handleImageSelect}
         multiple={false}
         title='Insert Image'
+        acceptedTypes={['image']}
       />
     </>
   );
