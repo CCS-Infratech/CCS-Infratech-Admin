@@ -2,15 +2,11 @@
 
 import { FormEvent, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import {
-  IconEye,
-  IconPhoto,
-  IconPlayerPlay,
-  IconTrash,
-} from '@tabler/icons-react';
+import { IconPhoto, IconTrash } from '@tabler/icons-react';
 import { toast } from 'sonner';
 
 import PageContainer from '@/components/layout/page-container';
+import { VideoUploadField } from '@/components/media-library/video-upload-field';
 import { MediaSelectionDialog } from '@/components/modal/media-gallary';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Heading } from '@/components/ui/heading';
@@ -53,6 +49,7 @@ export default function EditWalkthroughPage() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [mediaDialogOpen, setMediaDialogOpen] = useState(false);
 
@@ -125,8 +122,13 @@ export default function EditWalkthroughPage() {
       return;
     }
 
+    if (uploadingVideo) {
+      toast.error('Wait for the video upload to finish');
+      return;
+    }
+
     if (!walkthrough.videoUrl.trim()) {
-      toast.error('Video URL is required');
+      toast.error('Upload a video or enter a video URL');
       return;
     }
 
@@ -329,64 +331,19 @@ export default function EditWalkthroughPage() {
                 </h2>
 
                 <p className='mt-1 text-sm text-gray-500'>
-                  Enter the hosted video URL used by the
-                  public video player.
+                  Upload a video file, or enter the hosted
+                  video URL used by the public video player.
                 </p>
               </div>
 
-              <div className='flex gap-2'>
-                <Input
-                  id='videoUrl'
-                  type='url'
-                  value={walkthrough.videoUrl}
-                  onChange={(event) =>
-                    updateField(
-                      'videoUrl',
-                      event.target.value
-                    )
-                  }
-                  placeholder='https://...'
-                  disabled={saving || deleting}
-                  required
-                />
-
-                <a
-                  href={walkthrough.videoUrl}
-                  target='_blank'
-                  rel='noreferrer'
-                  className={cn(
-                    buttonVariants({
-                      variant: 'outline',
-                    }),
-                    'shrink-0'
-                  )}
-                  title='Open video'
-                >
-                  <IconEye className='h-4 w-4' />
-                </a>
-              </div>
-
-              {walkthrough.videoUrl && (
-                <div className='overflow-hidden rounded-xl border bg-black'>
-                  <div className='flex items-center gap-2 border-b border-zinc-800 bg-zinc-950 px-4 py-3 text-white'>
-                    <IconPlayerPlay className='h-4 w-4' />
-                    <span className='text-sm font-medium'>
-                      Video Preview
-                    </span>
-                  </div>
-
-                  <video
-                    key={walkthrough.videoUrl}
-                    src={walkthrough.videoUrl}
-                    controls
-                    playsInline
-                    className='aspect-video w-full'
-                  >
-                    Your browser does not support video
-                    playback.
-                  </video>
-                </div>
-              )}
+              <VideoUploadField
+                value={walkthrough.videoUrl}
+                onChange={(url) =>
+                  updateField('videoUrl', url)
+                }
+                disabled={saving || deleting}
+                onUploadingChange={setUploadingVideo}
+              />
             </div>
           </div>
 
@@ -538,10 +495,14 @@ export default function EditWalkthroughPage() {
 
             <Button
               type='submit'
-              disabled={saving || deleting}
+              disabled={saving || deleting || uploadingVideo}
               className='bg-black text-white hover:bg-gray-800'
             >
-              {saving ? 'Saving...' : 'Save Changes'}
+              {saving
+                ? 'Saving...'
+                : uploadingVideo
+                  ? 'Uploading video...'
+                  : 'Save Changes'}
             </Button>
           </div>
         </form>

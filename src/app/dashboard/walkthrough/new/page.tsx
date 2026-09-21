@@ -6,6 +6,7 @@ import { IconPhoto, IconPlayerPlay } from '@tabler/icons-react';
 import { toast } from 'sonner';
 
 import PageContainer from '@/components/layout/page-container';
+import { VideoUploadField } from '@/components/media-library/video-upload-field';
 import { MediaSelectionDialog } from '@/components/modal/media-gallary';
 import { Button, buttonVariants } from '@/components/ui/button';
 import { Heading } from '@/components/ui/heading';
@@ -49,6 +50,7 @@ export default function NewWalkthroughPage() {
   });
 
   const [saving, setSaving] = useState(false);
+  const [uploadingVideo, setUploadingVideo] = useState(false);
   const [mediaDialogOpen, setMediaDialogOpen] = useState(false);
 
   const updateField = <K extends keyof CreateWalkthrough>(
@@ -82,8 +84,13 @@ export default function NewWalkthroughPage() {
       return;
     }
 
+    if (uploadingVideo) {
+      toast.error('Wait for the video upload to finish');
+      return;
+    }
+
     if (!form.videoUrl?.trim()) {
-      toast.error('Video URL is required');
+      toast.error('Upload a video or enter a video URL');
       return;
     }
 
@@ -178,26 +185,16 @@ export default function NewWalkthroughPage() {
               </div>
 
               <div className='grid gap-2'>
-                <Label htmlFor='videoUrl'>Video URL</Label>
-                <Input
-                  id='videoUrl'
-                  type='url'
-                  value={form.videoUrl}
-                  onChange={(event) =>
-                    updateField(
-                      'videoUrl',
-                      event.target.value
-                    )
-                  }
-                  placeholder='https://...'
-                  disabled={saving}
-                  required
-                />
+                <Label>Walkthrough Video</Label>
 
-                <p className='text-muted-foreground text-xs'>
-                  Use the hosted video URL that should open in
-                  the website video player.
-                </p>
+                <VideoUploadField
+                  value={form.videoUrl}
+                  onChange={(url) =>
+                    updateField('videoUrl', url)
+                  }
+                  disabled={saving}
+                  onUploadingChange={setUploadingVideo}
+                />
               </div>
             </div>
           </div>
@@ -340,10 +337,14 @@ export default function NewWalkthroughPage() {
 
             <Button
               type='submit'
-              disabled={saving}
+              disabled={saving || uploadingVideo}
               className='bg-black text-white hover:bg-gray-800'
             >
-              {saving ? 'Creating...' : 'Create Walkthrough'}
+              {saving
+                ? 'Creating...'
+                : uploadingVideo
+                  ? 'Uploading video...'
+                  : 'Create Walkthrough'}
             </Button>
           </div>
         </form>
