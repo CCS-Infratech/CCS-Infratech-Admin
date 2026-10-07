@@ -17,17 +17,34 @@ export const pressService = {
       sortOrder?: number;
     }>;
   }): Promise<any> => {
-    const response = await api.post<any>('/press', pressData);
+    const response = await api.post<any>(
+      '/press',
+      pressData
+    );
+
     return response.data;
   },
 
-  getAllPress: async (): Promise<any[]> => {
-    const response = await api.get<any[]>('/press');
+  getAllPress: async (
+    params?: {
+      page?: number;
+      limit?: number;
+    }
+  ): Promise<any> => {
+    const response = await api.get<any>('/press', {
+      params,
+    });
+
     return response.data;
   },
 
-  getPressById: async (id: string): Promise<any> => {
-    const response = await api.get<any>(`/press/${id}`);
+  getPressById: async (
+    id: string
+  ): Promise<any> => {
+    const response = await api.get<any>(
+      `/press/${id}`
+    );
+
     return response.data.data;
   },
 
@@ -50,17 +67,31 @@ export const pressService = {
       }>;
     }
   ): Promise<any> => {
-    const response = await api.put<any>(`/press/${id}`, pressData);
+    const response = await api.put<any>(
+      `/press/${id}`,
+      pressData
+    );
+
     return response.data.press;
   },
 
-  deletePress: async (id: string): Promise<any> => {
-    const response = await api.delete<any>(`/press/${id}`);
+  deletePress: async (
+    id: string
+  ): Promise<any> => {
+    const response = await api.delete<any>(
+      `/press/${id}`
+    );
+
     return response.data;
   },
 
-  deletePressItem: async (id: string): Promise<any> => {
-    const response = await api.delete<any>(`/press/press-items/${id}`);
+  deletePressItem: async (
+    id: string
+  ): Promise<any> => {
+    const response = await api.delete<any>(
+      `/press/press-items/${id}`
+    );
+
     return response.data;
-  }
+  },
 };

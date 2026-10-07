@@ -329,7 +329,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Refresh user data with retry logic
   const refreshUser = useCallback(async () => {
-    if (state.status !== 'authenticated') return;
+    if (state.status === 'unauthenticated' || state.status === 'error') return;
 
     const retryRequest = async (retries = 0) => {
       try {
@@ -340,6 +340,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (response.success && response.user) {
           dispatch({ type: 'AUTH_SUCCESS', payload: response.user });
           localStorage.setItem('user', JSON.stringify(response.user));
+
+          // The backend issues a renewed JWT on /auth/me.
+          // Store it and reset the client-side expiry timer.
+          if (response.token) {
+            localStorage.setItem('accessToken', response.token);
+
+            try {
+              const payload = JSON.parse(atob(response.token.split('.')[1]));
+              if (payload.exp) {
+                setTokenExpiryTime(payload.exp * 1000);
+              }
+            } catch (tokenError) {
+              console.error('Failed to parse refreshed access token:', tokenError);
+            }
+          }
         } else {
           throw new Error(response.message || 'Failed to refresh user data');
         }

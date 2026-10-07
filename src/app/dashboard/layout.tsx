@@ -6,27 +6,31 @@ import type { Metadata } from 'next';
 import { cookies } from 'next/headers';
 
 export const metadata: Metadata = {
-  title: "CCS Infratech Admin",
-  description: 'Basic dashboard with Next.js and Shadcn'
+  title: 'CCS Infratech Admin',
+  description: 'Basic dashboard with Next.js and Shadcn',
 };
 
 export default async function DashboardLayout({
-  children
+  children,
 }: {
   children: React.ReactNode;
 }) {
-  // Persisting the sidebar state in the cookie.
   const cookieStore = await cookies();
-  const defaultOpen = cookieStore.get('sidebar_state')?.value === 'true';
+
+  const defaultOpen =
+    cookieStore.get('sidebar_state')?.value === 'true';
+
   return (
     <KBar>
       <SidebarProvider defaultOpen={defaultOpen}>
         <AppSidebar />
+
         <SidebarInset>
           <Header />
-          {/* page main content */}
-          {children}
-          {/* page main content ends */}
+
+          <main className="flex min-h-0 flex-1 flex-col">
+            {children}
+          </main>
         </SidebarInset>
       </SidebarProvider>
     </KBar>
