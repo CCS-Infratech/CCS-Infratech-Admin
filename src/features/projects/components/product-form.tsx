@@ -293,7 +293,6 @@ export default function ProjectForm({ pageTitle }: { pageTitle: string }) {
   const [projectGroups, setProjectGroups] = useState<
     Array<{ id: string; name: string }>
   >([]);
-  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
 
   const [galleryImages, setGalleryImages] = useState<
     Array<{ image: MediaObject; isFeatured: boolean }>
@@ -415,8 +414,53 @@ export default function ProjectForm({ pageTitle }: { pageTitle: string }) {
   };
 
   const removeAmenity = (index: number) => {
-    if (amenities.length > 1)
+    if (amenities.length > 1) {
       setAmenities(amenities.filter((_, i) => i !== index));
+    } else {
+      setAmenities([{ name: '', imageUrl: null }]);
+    }
+  };
+
+  const addPredefinedAmenity = (
+    amenity: (typeof PREDEFINED_AMENITIES)[number]
+  ) => {
+    const exists = amenities.some(
+      (item) =>
+        item.name.trim().toLowerCase() ===
+        amenity.name.trim().toLowerCase()
+    );
+
+    if (exists) return;
+
+    const emptyIndex = amenities.findIndex(
+      (item) => !item.name.trim() && !item.imageUrl
+    );
+
+    const predefinedImage = {
+      url: amenity.imageUrl,
+      key: amenity.imageUrl.split('/').pop() || '',
+      size: 0,
+      lastModified: '',
+      type: 'image'
+    };
+
+    if (emptyIndex >= 0) {
+      const updatedAmenities = [...amenities];
+      updatedAmenities[emptyIndex] = {
+        name: amenity.name,
+        imageUrl: predefinedImage
+      };
+      setAmenities(updatedAmenities);
+      return;
+    }
+
+    setAmenities([
+      ...amenities,
+      {
+        name: amenity.name,
+        imageUrl: predefinedImage
+      }
+    ]);
   };
 
   const handleSubmit = async () => {
@@ -451,13 +495,14 @@ export default function ProjectForm({ pageTitle }: { pageTitle: string }) {
           imageUrl: spec.imageUrl ? spec.imageUrl.url : null
         }));
 
-      const filteredAmenities = selectedAmenities.map((id) => {
-        const amenity = PREDEFINED_AMENITIES.find((a) => a.id === id);
-        return {
-          name: amenity!.name,
-          imageUrl: amenity!.imageUrl
-        };
-      });
+      const filteredAmenities = amenities
+        .filter((amenity) => amenity.name.trim())
+        .map((amenity) => ({
+          name: amenity.name.trim(),
+          imageUrl: amenity.imageUrl
+            ? amenity.imageUrl.url
+            : null
+        }));
       const formattedGalleryImages = galleryImages.map((item, index) => ({
         url: item.image.url,
         filename: item.image.key.split('/').pop() || '',
@@ -498,7 +543,7 @@ export default function ProjectForm({ pageTitle }: { pageTitle: string }) {
         nearbyAttractions,
         locationDetails,
         specifications: filteredSpecs.length ? filteredSpecs : undefined,
-        amenities: filteredAmenities.length ? filteredAmenities : undefined,
+        amenities: filteredAmenities,
         images: formattedGalleryImages.length
           ? formattedGalleryImages
           : undefined
@@ -1166,105 +1211,164 @@ export default function ProjectForm({ pageTitle }: { pageTitle: string }) {
 
             {/* Amenities */}
             {activeTab === 'amenities' && (
-              <div className='mb-16 space-y-4 sm:space-y-5'>
-                <div>
-                  <h3 className='text-base font-bold text-gray-900 sm:text-lg'>
-                    Amenities
-                  </h3>
-                  <p className='mt-1 text-xs text-gray-500 sm:text-sm'>
-                    Select available amenities for this project
-                  </p>
-                </div>
+              <div className='mb-16 space-y-5'>
+                <div className='rounded-xl border border-gray-100 bg-white p-4 shadow-sm sm:rounded-2xl sm:p-6'>
+                  <div className='mb-5'>
+                    <h3 className='text-base font-bold text-gray-900 sm:text-lg'>
+                      Amenities
+                    </h3>
+                    <p className='mt-1 text-xs text-gray-500 sm:text-sm'>
+                      Add built-in amenities or create as many custom amenities
+                      as needed.
+                    </p>
+                  </div>
 
-                <div className='grid grid-cols-1 gap-3 sm:grid-cols-2 sm:gap-4'>
-                  {PREDEFINED_AMENITIES.map((amenity) => {
-                    const isSelected = selectedAmenities.includes(amenity.id);
+                  <div className='mb-6'>
+                    <div className='mb-3 flex items-center justify-between'>
+                      <h4 className='text-sm font-semibold text-gray-900'>
+                        Built-in Amenities
+                      </h4>
+                      <span className='text-xs text-gray-500'>
+                        {PREDEFINED_AMENITIES.length} available
+                      </span>
+                    </div>
 
-                    return (
-                      <button
-                        key={amenity.id}
-                        type='button'
-                        onClick={() => {
-                          setSelectedAmenities((prev) =>
-                            isSelected
-                              ? prev.filter((id) => id !== amenity.id)
-                              : [...prev, amenity.id]
-                          );
-                        }}
-                        className={`group relative overflow-hidden rounded-2xl border-2 transition-all ${
-                          isSelected
-                            ? 'border-[#b07d17] bg-gradient-to-br from-[#b07d17]/10 to-[#c89420]/5 shadow-lg shadow-[#b07d17]/20'
-                            : 'border-gray-200 bg-white hover:border-[#b07d17]/50 hover:shadow-md'
-                        }`}
-                      >
-                        <div className='flex items-center gap-4 p-4 sm:p-5'>
-                          <div className='relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl bg-gray-50 sm:h-20 sm:w-20'>
+                    <div className='grid grid-cols-1 gap-3 sm:grid-cols-2'>
+                      {PREDEFINED_AMENITIES.map((amenity) => {
+                        const isAdded = amenities.some(
+                          (item) =>
+                            item.name.trim().toLowerCase() ===
+                            amenity.name.trim().toLowerCase()
+                        );
+
+                        return (
+                          <div
+                            key={amenity.id}
+                            className='flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-3'
+                          >
                             <img
                               src={amenity.imageUrl}
                               alt={amenity.name}
-                              className='h-full w-full object-cover transition-transform group-hover:scale-110'
+                              className='h-12 w-12 rounded-lg object-cover'
                             />
-                          </div>
 
-                          <div className='flex-1 text-left'>
-                            <h4
-                              className={`text-sm font-semibold transition-colors sm:text-base ${
-                                isSelected ? 'text-[#b07d17]' : 'text-gray-900'
-                              }`}
+                            <div className='min-w-0 flex-1'>
+                              <p className='truncate text-sm font-medium text-gray-900'>
+                                {amenity.name}
+                              </p>
+                            </div>
+
+                            <Button
+                              type='button'
+                              size='sm'
+                              variant={isAdded ? 'secondary' : 'default'}
+                              disabled={isAdded}
+                              onClick={() =>
+                                addPredefinedAmenity(amenity)
+                              }
+                              className='shrink-0'
                             >
-                              {amenity.name}
-                            </h4>
+                              {isAdded ? 'Added' : 'Add'}
+                            </Button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className='border-t border-gray-100 pt-5'>
+                    <div className='mb-4 flex items-center justify-between gap-3'>
+                      <div>
+                        <h4 className='text-sm font-semibold text-gray-900'>
+                          Project Amenities
+                        </h4>
+                        <p className='mt-1 text-xs text-gray-500'>
+                          {amenities.filter((a) => a.name.trim()).length}{' '}
+                          configured
+                        </p>
+                      </div>
+
+                      <Button
+                        type='button'
+                        variant='outline'
+                        onClick={addAmenity}
+                        className='shrink-0'
+                      >
+                        <Plus className='mr-2 h-4 w-4' />
+                        Add Amenity
+                      </Button>
+                    </div>
+
+                    <div className='space-y-4'>
+                      {amenities.map((amenity, index) => (
+                        <div
+                          key={`amenity-${index}`}
+                          className='rounded-xl border border-gray-200 bg-gray-50/50 p-4'
+                        >
+                          <div className='mb-4 flex items-center justify-between gap-3'>
+                            <h5 className='text-sm font-semibold text-gray-900'>
+                              Amenity {index + 1}
+                            </h5>
+
+                            <Button
+                              type='button'
+                              variant='ghost'
+                              size='sm'
+                              onClick={() => removeAmenity(index)}
+                              className='text-red-600 hover:bg-red-50 hover:text-red-700'
+                            >
+                              <X className='mr-1 h-4 w-4' />
+                              Remove
+                            </Button>
                           </div>
 
-                          <div
-                            className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-2 transition-all ${
-                              isSelected
-                                ? 'border-[#b07d17] bg-[#b07d17]'
-                                : 'border-gray-300 bg-white'
-                            }`}
-                          >
-                            {isSelected && (
-                              <svg
-                                className='h-4 w-4 text-white'
-                                fill='none'
-                                viewBox='0 0 24 24'
-                                stroke='currentColor'
-                                strokeWidth={3}
-                              >
-                                <path
-                                  strokeLinecap='round'
-                                  strokeLinejoin='round'
-                                  d='M5 13l4 4L19 7'
-                                />
-                              </svg>
-                            )}
+                          <div className='grid gap-4 md:grid-cols-2'>
+                            <div>
+                              <Label className='mb-2 block text-sm font-medium text-gray-700'>
+                                Amenity Name
+                              </Label>
+
+                              <Input
+                                value={amenity.name}
+                                onChange={(e) =>
+                                  updateAmenity(
+                                    index,
+                                    'name',
+                                    e.target.value
+                                  )
+                                }
+                                placeholder="e.g. Children's Play Area"
+                                className='rounded-xl border-gray-200'
+                              />
+                            </div>
+
+                            <div>
+                              <Label className='mb-2 block text-sm font-medium text-gray-700'>
+                                Amenity Image
+                              </Label>
+
+                              <MediumImageUpload
+                                value={amenity.imageUrl}
+                                onChange={(media) =>
+                                  updateAmenity(
+                                    index,
+                                    'imageUrl',
+                                    media
+                                  )
+                                }
+                                label='Amenity Image'
+                                acceptType='image'
+                              />
+                            </div>
                           </div>
                         </div>
-
-                        {isSelected && (
-                          <div className='absolute top-0 right-0 rounded-bl-lg bg-gradient-to-r from-[#b07d17] to-[#c89420] px-2.5 py-1'>
-                            <span className='text-xs font-semibold text-white'>
-                              Selected
-                            </span>
-                          </div>
-                        )}
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {selectedAmenities.length > 0 && (
-                  <div className='rounded-xl border border-gray-100 bg-gradient-to-br from-[#b07d17]/5 to-white p-4 sm:p-5'>
-                    <p className='text-xs font-medium text-gray-700 sm:text-sm'>
-                      <span className='font-bold text-[#b07d17]'>
-                        {selectedAmenities.length}
-                      </span>{' '}
-                      amenities selected
-                    </p>
+                      ))}
+                    </div>
                   </div>
-                )}
+                </div>
               </div>
             )}
+
           </div>
         </div>
       </div>

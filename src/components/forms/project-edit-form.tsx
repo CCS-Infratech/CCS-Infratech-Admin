@@ -294,7 +294,9 @@ export default function ProjectEditForm({ projectId }: { projectId: string }) {
   const [projectGroups, setProjectGroups] = useState<
     Array<{ id: string; name: string }>
   >([]);
-  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
+  const [amenities, setAmenities] = useState<
+    { name: string; imageUrl: MediaObject | null }[]
+  >([]);
 
   const [galleryImages, setGalleryImages] = useState<
     Array<{ image: MediaObject; isFeatured: boolean }>
@@ -462,17 +464,25 @@ export default function ProjectEditForm({ projectId }: { projectId: string }) {
           );
         }
 
-        // Populate amenities
+        // Populate amenities from the database.
+        // Custom amenities are preserved exactly as stored.
         if (project.amenities && project.amenities.length > 0) {
-          const amenityIds = project.amenities
-            .map((amenity: any) => {
-              const found = PREDEFINED_AMENITIES.find(
-                (a) => a.name === amenity.name
-              );
-              return found?.id;
-            })
-            .filter(Boolean);
-          setSelectedAmenities(amenityIds);
+          setAmenities(
+            project.amenities.map((amenity: any) => ({
+              name: amenity.name || '',
+              imageUrl: amenity.imageUrl
+                ? {
+                    url: amenity.imageUrl,
+                    key: amenity.imageUrl.split('/').pop() || '',
+                    size: 0,
+                    lastModified: '',
+                    type: 'image'
+                  }
+                : null
+            }))
+          );
+        } else {
+          setAmenities([]);
         }
 
         // Populate gallery images
@@ -528,14 +538,28 @@ export default function ProjectEditForm({ projectId }: { projectId: string }) {
   };
 
   const removeGalleryImage = (index: number) => {
-    setGalleryImages(galleryImages.filter((_, i) => i !== index));
+    setGalleryImages((currentImages) => {
+      const removedImage = currentImages[index];
+      const remainingImages = currentImages.filter((_, i) => i !== index);
+
+      // Keep a valid featured image when the currently featured image
+      // is removed.
+      if (removedImage?.isFeatured && remainingImages.length > 0) {
+        return remainingImages.map((image, i) => ({
+          ...image,
+          isFeatured: i === 0
+        }));
+      }
+
+      return remainingImages;
+    });
   };
 
   const toggleFeaturedImage = (index: number) => {
-    setGalleryImages(
-      galleryImages.map((img, i) => ({
+    setGalleryImages((currentImages) =>
+      currentImages.map((img, i) => ({
         ...img,
-        isFeatured: i === index ? !img.isFeatured : img.isFeatured
+        isFeatured: i === index ? !img.isFeatured : false
       }))
     );
   };
@@ -562,12 +586,57 @@ export default function ProjectEditForm({ projectId }: { projectId: string }) {
       setSpecifications(specifications.filter((_, i) => i !== index));
   };
 
-  const toggleAmenity = (amenityId: string) => {
-    setSelectedAmenities((prev) =>
-      prev.includes(amenityId)
-        ? prev.filter((id) => id !== amenityId)
-        : [...prev, amenityId]
+  const addAmenity = () => {
+    setAmenities((prev) => [
+      ...prev,
+      { name: '', imageUrl: null }
+    ]);
+  };
+
+  const updateAmenity = (
+    index: number,
+    field: 'name' | 'imageUrl',
+    value: string | MediaObject | null
+  ) => {
+    setAmenities((prev) =>
+      prev.map((amenity, i) =>
+        i === index
+          ? { ...amenity, [field]: value }
+          : amenity
+      )
     );
+  };
+
+  const removeAmenity = (index: number) => {
+    setAmenities((prev) =>
+      prev.filter((_, i) => i !== index)
+    );
+  };
+
+  const addPredefinedAmenity = (amenity: (typeof PREDEFINED_AMENITIES)[number]) => {
+    setAmenities((prev) => {
+      const exists = prev.some(
+        (item) =>
+          item.name.trim().toLowerCase() ===
+          amenity.name.trim().toLowerCase()
+      );
+
+      if (exists) return prev;
+
+      return [
+        ...prev,
+        {
+          name: amenity.name,
+          imageUrl: {
+            url: amenity.imageUrl,
+            key: amenity.imageUrl.split('/').pop() || '',
+            size: 0,
+            lastModified: '',
+            type: 'image'
+          }
+        }
+      ];
+    });
   };
 
   const handleSubmit = async () => {
@@ -602,13 +671,14 @@ export default function ProjectEditForm({ projectId }: { projectId: string }) {
           imageUrl: spec.imageUrl ? spec.imageUrl.url : null
         }));
 
-      const filteredAmenities = selectedAmenities.map((id) => {
-        const amenity = PREDEFINED_AMENITIES.find((a) => a.id === id);
-        return {
-          name: amenity!.name,
-          imageUrl: amenity!.imageUrl
-        };
-      });
+      const filteredAmenities = amenities
+        .filter((amenity) => amenity.name.trim())
+        .map((amenity) => ({
+          name: amenity.name.trim(),
+          imageUrl: amenity.imageUrl
+            ? amenity.imageUrl.url
+            : null
+        }));
 
       const formattedGalleryImages = galleryImages.map((item, index) => ({
         url: item.image.url,
@@ -650,10 +720,8 @@ export default function ProjectEditForm({ projectId }: { projectId: string }) {
         nearbyAttractions,
         locationDetails,
         specifications: filteredSpecs.length ? filteredSpecs : undefined,
-        amenities: filteredAmenities.length ? filteredAmenities : undefined,
-        images: formattedGalleryImages.length
-          ? formattedGalleryImages
-          : undefined
+        amenities: filteredAmenities,
+        images: formattedGalleryImages
       });
 
       toast.success('Your project has been updated successfully!');
@@ -1336,66 +1404,177 @@ export default function ProjectEditForm({ projectId }: { projectId: string }) {
 
             {/* Amenities Tab */}
             {activeTab === 'amenities' && (
-              <div className='rounded-xl border border-gray-100 bg-white p-4 shadow-sm sm:rounded-2xl sm:p-6'>
-                <div className='mb-6'>
-                  <h3 className='text-base font-bold text-gray-900 sm:text-lg'>
-                    Select Amenities
-                  </h3>
-                  <p className='mt-1 text-xs text-gray-500 sm:text-sm'>
-                    Choose from predefined amenities
-                  </p>
-                </div>
-
-                <div className='grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3'>
-                  {PREDEFINED_AMENITIES.map((amenity) => (
-                    <button
-                      key={amenity.id}
-                      onClick={() => toggleAmenity(amenity.id)}
-                      className={`group relative overflow-hidden rounded-2xl border-2 p-4 transition-all ${
-                        selectedAmenities.includes(amenity.id)
-                          ? 'border-[#b07d17] bg-[#b07d17]/5'
-                          : 'border-gray-200 hover:border-[#b07d17]/50'
-                      }`}
-                    >
-                      <div className='aspect-square overflow-hidden rounded-xl'>
-                        <img
-                          src={amenity.imageUrl}
-                          alt={amenity.name}
-                          className='h-full w-full object-cover transition-transform group-hover:scale-105'
-                        />
-                      </div>
-                      <p className='mt-3 text-center text-xs font-medium text-gray-900 sm:text-sm'>
-                        {amenity.name}
-                      </p>
-
-                      {selectedAmenities.includes(amenity.id) && (
-                        <div className='absolute top-2 right-2 flex h-6 w-6 items-center justify-center rounded-full bg-[#b07d17] text-white'>
-                          <svg
-                            className='h-4 w-4'
-                            fill='none'
-                            strokeLinecap='round'
-                            strokeLinejoin='round'
-                            strokeWidth='2'
-                            viewBox='0 0 24 24'
-                            stroke='currentColor'
-                          >
-                            <path d='M5 13l4 4L19 7'></path>
-                          </svg>
-                        </div>
-                      )}
-                    </button>
-                  ))}
-                </div>
-
-                {selectedAmenities.length > 0 && (
-                  <div className='mt-6 rounded-xl bg-[#b07d17]/5 p-4'>
-                    <p className='text-sm font-medium text-gray-900'>
-                      Selected: {selectedAmenities.length} amenities
+              <div className='mb-16 space-y-5'>
+                <div className='rounded-xl border border-gray-100 bg-white p-4 shadow-sm sm:rounded-2xl sm:p-6'>
+                  <div className='mb-5'>
+                    <h3 className='text-base font-bold text-gray-900 sm:text-lg'>
+                      Amenities
+                    </h3>
+                    <p className='mt-1 text-xs text-gray-500 sm:text-sm'>
+                      Add built-in amenities or create as many custom amenities
+                      as needed.
                     </p>
                   </div>
-                )}
+
+                  <div className='mb-6'>
+                    <div className='mb-3 flex items-center justify-between'>
+                      <h4 className='text-sm font-semibold text-gray-900'>
+                        Built-in Amenities
+                      </h4>
+                      <span className='text-xs text-gray-500'>
+                        {PREDEFINED_AMENITIES.length} available
+                      </span>
+                    </div>
+
+                    <div className='grid grid-cols-1 gap-3 sm:grid-cols-2'>
+                      {PREDEFINED_AMENITIES.map((amenity) => {
+                        const isAdded = amenities.some(
+                          (item) =>
+                            item.name.trim().toLowerCase() ===
+                            amenity.name.trim().toLowerCase()
+                        );
+
+                        return (
+                          <div
+                            key={amenity.id}
+                            className='flex items-center gap-3 rounded-xl border border-gray-200 bg-white p-3'
+                          >
+                            <img
+                              src={amenity.imageUrl}
+                              alt={amenity.name}
+                              className='h-12 w-12 rounded-lg object-cover'
+                            />
+
+                            <div className='min-w-0 flex-1'>
+                              <p className='truncate text-sm font-medium text-gray-900'>
+                                {amenity.name}
+                              </p>
+                            </div>
+
+                            <Button
+                              type='button'
+                              size='sm'
+                              variant={isAdded ? 'secondary' : 'default'}
+                              disabled={isAdded}
+                              onClick={() =>
+                                addPredefinedAmenity(amenity)
+                              }
+                              className='shrink-0'
+                            >
+                              {isAdded ? 'Added' : 'Add'}
+                            </Button>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className='border-t border-gray-100 pt-5'>
+                    <div className='mb-4 flex items-center justify-between gap-3'>
+                      <div>
+                        <h4 className='text-sm font-semibold text-gray-900'>
+                          Project Amenities
+                        </h4>
+                        <p className='mt-1 text-xs text-gray-500'>
+                          {amenities.length} amenit
+                          {amenities.length === 1 ? 'y' : 'ies'}
+                          configured
+                        </p>
+                      </div>
+
+                      <Button
+                        type='button'
+                        variant='outline'
+                        onClick={addAmenity}
+                        className='shrink-0'
+                      >
+                        <Plus className='mr-2 h-4 w-4' />
+                        Add Amenity
+                      </Button>
+                    </div>
+
+                    {amenities.length === 0 ? (
+                      <div className='rounded-xl border-2 border-dashed border-gray-200 p-8 text-center'>
+                        <Star className='mx-auto h-8 w-8 text-gray-300' />
+                        <p className='mt-3 text-sm font-medium text-gray-700'>
+                          No amenities added yet
+                        </p>
+                        <p className='mt-1 text-xs text-gray-500'>
+                          Add a built-in amenity above or create a custom one.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className='space-y-4'>
+                        {amenities.map((amenity, index) => (
+                          <div
+                            key={`amenity-${index}`}
+                            className='rounded-xl border border-gray-200 bg-gray-50/50 p-4'
+                          >
+                            <div className='mb-4 flex items-center justify-between gap-3'>
+                              <h5 className='text-sm font-semibold text-gray-900'>
+                                Amenity {index + 1}
+                              </h5>
+
+                              <Button
+                                type='button'
+                                variant='ghost'
+                                size='sm'
+                                onClick={() => removeAmenity(index)}
+                                className='text-red-600 hover:bg-red-50 hover:text-red-700'
+                              >
+                                <X className='mr-1 h-4 w-4' />
+                                Remove
+                              </Button>
+                            </div>
+
+                            <div className='grid gap-4 md:grid-cols-2'>
+                              <div>
+                                <Label className='mb-2 block text-sm font-medium text-gray-700'>
+                                  Amenity Name
+                                </Label>
+
+                                <Input
+                                  value={amenity.name}
+                                  onChange={(e) =>
+                                    updateAmenity(
+                                      index,
+                                      'name',
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder="e.g. Children's Play Area"
+                                  className='rounded-xl border-gray-200'
+                                />
+                              </div>
+
+                              <div>
+                                <Label className='mb-2 block text-sm font-medium text-gray-700'>
+                                  Amenity Image
+                                </Label>
+
+                                <MediumImageUpload
+                                  value={amenity.imageUrl}
+                                  onChange={(media) =>
+                                    updateAmenity(
+                                      index,
+                                      'imageUrl',
+                                      media
+                                    )
+                                  }
+                                  label='Amenity Image'
+                                  acceptType='image'
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             )}
+
           </div>
         </div>
       </div>
